@@ -23,7 +23,7 @@ import { Sparkles } from 'lucide-vue-next';
         </div>
 
         <div class="text-sm text-primary-light/60">
-          © 2024 SkinSense AI. All rights reserved.
+          © 2026 SkinSense AI. All rights reserved.
         </div>
       </div>
     </div>

@@ -7,12 +7,22 @@
   --color-secondary: #D4C4A8;
   --color-secondary-light: #F8F5F0;
   --color-secondary-dark: #B8A88B;
-    --font-sans: 'Inter', sans-serif;
+
+  --color-p: #829672;       /* primary (sage) */
+  --color-p-l: #f4f3f1;     /* primary light (mist) */
+  --color-p-d: #344C3D;     /* primary dark (evergreen) */
+
+  --color-s: #D8959B;       /* secondary (mauve) */
+  --color-s-l: #f2d1d4;     /* secondary light (peony) */
+  --color-s-d: #b06f76;     /* secondary dark */
+
+  --font-sans: 'Inter', sans-serif;
   --font-display: 'Outfit', sans-serif;
+  
 }
 
 body {
-  @apply bg-secondary-light text-gray-800 font-sans antialiased;
+ 
 }
 
 h1,

@@ -20,7 +20,7 @@ const navLinks = [
             <Sparkles class="w-5 h-5 text-white" />
           </div>
           <span class="text-xl md:text-2xl font-display font-bold text-primary-dark tracking-tight">
-            SkinSync
+            SkinSense AI
           </span>
         </RouterLink>
 
