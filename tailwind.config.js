@@ -4,6 +4,15 @@ export default {
         './index.html',
         './src/**/*.{js,ts,jsx,tsx}',
     ],
+    theme: {
+    extend: {
+      fontFamily: {
+        sans: ['var(--font-sans)'],
+        display: ['var(--font-display)'],
+        garamond: ['var(--font-garamond)'],  // ← tambah ini
+      }
+    }
+  },
     
     plugins:[], 
 }

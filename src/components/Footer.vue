@@ -8,7 +8,7 @@ import { Sparkles } from 'lucide-vue-next';
       <div class="flex flex-col md:flex-row justify-between items-center space-y-8 md:space-y-0">
         <div class="text-center md:text-left space-y-4">
           <div class="flex items-center justify-center md:justify-start space-x-2">
-            <Sparkles class="w-6 h-6 text-primary-light" />
+            
             <span class="text-2xl font-display font-bold tracking-tight">SkinSense AI</span>
           </div>
           <p class="text-primary-light/80 max-w-xs">

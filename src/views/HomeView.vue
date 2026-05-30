@@ -5,55 +5,67 @@ import { ArrowRight, MapPin, Activity, ShieldCheck, Sparkles } from 'lucide-vue-
 </script>
 
 <template>
-  <div class="space-y-24 pb-6">
+  <div class="relative min-h-screen overflow-hidden bg-gradient-to-b from-white via-[#fbfaf8] to-[#f6f3ef] pb-6">
+    <div class="absolute inset-0 pointer-events-none">
+      <div class="absolute -top-20 -left-20 h-72 w-72 rounded-full bg-p-d/12 blur-3xl"></div>
+      <div class="absolute top-12 right-0 h-96 w-96 rounded-full bg-p-d/12 blur-3xl"></div>
+      <div class="absolute bottom-0 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-p-d/8 blur-3xl"></div>
+    </div>
 
-    <!-- HERO -->
-    <section class="relative pt-12 md:pt-24 overflow-hidden">
-      <div class="container mx-auto px-4 md:px-10 relative z-10">
-       
-        <div class="max-w-4xl space-y-8">
+    <section class="relative container mx-auto px-12 md:px-50 pt-24 md:pt-25">
+      <div class="grid items-center gap-8 lg:grid-cols-[1fr_auto]">
+          <div class="max-w-4xl space-y-8">
           <div class="inline-flex items-center space-x-2 px-4 py-2 bg-primary/10 rounded-full text-primary font-bold text-sm animate-bounce">
             <Sparkles class="w-4 h-4" />
             <span>SkinSense AI</span>
           </div>
 
-          <h1 class="text-5xl md:text-7xl lg:text-8xl font-display font-bold text-p-d leading-[1.1] tracking-tight">
-            Stop Guessing,
-            <span class="text-s italic"><br>Start Understanding Your Skin.</span>
-          </h1>
 
-         
-          <p class="text-lg md:text-xl text-gray-600 max-w-2xl leading-relaxed">
-            SkinSense AI menggabungkan profil kulitmu dan data cuaca real time
-            untuk memberikan rekomendasi skincare yang benar-benar sesuai bukan sekadar yang populer.
-          </p>
+          <div class="space-y-10">
+            <h1 class="max-w-2xl text-5xl font-bold leading-[1.05] tracking-tight text-p-d md:text-7xl">
+              Stop Guessing,
+              <span class="italic text-s"><br>Start Understanding Your Skin.</span>
+            </h1>
 
-          <div class="flex flex-col sm:flex-row items-center gap-4 pt-4">
-            <RouterLink to="/profile" class="btn-primary flex items-center space-x-3 text-lg px-8 py-4 w-full sm:w-auto">
+            <p class="max-w-2xl text-lg leading-relaxed text-gray-600 md:text-xl">
+              SkinSense AI menggabungkan profil kulitmu dan data cuaca real time
+              untuk memberikan rekomendasi skincare yang benar-benar sesuai, bukan sekadar yang populer.
+            </p>
+          </div>
+
+          <div class="flex flex-col gap-4 sm:flex-row">
+            <RouterLink to="/profile" class="btn-primary inline-flex items-center justify-center gap-3 text-lg px-8 py-4">
               <span>Cek Rekomendasi</span>
-              <ArrowRight class="w-5 h-5" />
+              <ArrowRight class="h-5 w-5" />
             </RouterLink>
           </div>
         </div>
+
+        <div class="flex flex-col justify-center items-center lg:items-start gap-3 w-full max-w-xs mx-auto lg:mx-0">
+  <div class="glass rounded-2xl p-10 shadow-sm flex items-start gap-3">
+    <MapPin class="mt-0.5 h-10 w-10 shrink-0 text-primary" />
+    <div>
+      <p class="text-sm font-semibold text-p-d">Lokasi</p>
+      <p class="text-sm text-gray-500">Rekomendasi sesuai cuaca tempatmu</p>
+    </div>
+  </div>
+  <div class="glass rounded-2xl p-10 shadow-sm flex items-start gap-3">
+    <Activity class="mt-0.5 h-10 w-10 shrink-0 text-primary" />
+    <div>
+      <p class="text-sm font-semibold text-p-d">Profil Kulit</p>
+      <p class="text-sm text-gray-500">Analisis kebutuhan kulit yang spesifik</p>
+    </div>
+  </div>
+  <div class="glass rounded-2xl p-10 shadow-sm flex items-start gap-3">
+    <ShieldCheck class="mt-0.5 h-10 w-10 shrink-0 text-primary" />
+    <div>
+      <p class="text-sm font-semibold text-p-d">Aman</p>
+      <p class="text-sm text-gray-500">Saran yang lebih terarah dan personal</p>
+    </div>
+  </div>
+</div>
       </div>
-
-      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-gradient-to-b from-primary/5 to-transparent -z-10 rounded-full blur-3xl"></div>
     </section>
-
-    <!-- Bulatan dekoratif kiri bawah -->
-      <div class="absolute -bottom-30 -left-3 w-120 h-120 rounded-full bg-[var(--color-p)] opacity-30 -z-10"></div>
- 
-      <!-- Bulatan dekoratif kanan atas -->
-      <div class="absolute -top-0 -right-1 w-120 h-120 rounded-full bg-[var(--color-s)] opacity-20 -z-10"></div>
-      <!-- Bulatan dekoratif kiri atas ujung -->
-      <div class="absolute -top-20 -left-40 w-90 h-90 rounded-full bg-[var(--color-p)] opacity-30 -z-10"></div>
-        <!-- Bulatan dekoratif kanan bawah -->
-      <div class="absolute -bottom-18 -right-[-340px] w-80 h-80 rounded-full bg-[var(--color-s)] opacity-20 -z-10"></div>
-      <!-- Bulatan dekoratif kiri atas tengah -->
-      <div class="absolute -top-70 -left-[-500px] w-120 h-120 rounded-full bg-[var(--color-p)] opacity-30 -z-10"></div>
-
-
- 
-      
   </div>
 </template>
+        

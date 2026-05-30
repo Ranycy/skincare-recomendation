@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+
 @theme {
   --color-primary: #4A6741;
   --color-primary-light: #8CA67A;
@@ -49,7 +50,7 @@ h6 {
   }
 
   .glass {
-    @apply bg-white/70 backdrop-blur-md border border-white/20;
+    @apply bg-white/10 backdrop-blur-md border border-white/20;
   }
 }
 

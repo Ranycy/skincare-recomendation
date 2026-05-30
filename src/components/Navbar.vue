@@ -16,10 +16,10 @@ const navLinks = [
     <div class="container mx-auto px-4 md:px-6">
       <div class="flex items-center justify-between h-16 md:h-20">
         <RouterLink to="/" class="flex items-center space-x-2 group">
-          <div class="bg-primary p-1.5 rounded-lg transition-transform group-hover:rotate-12">
-            <Sparkles class="w-5 h-5 text-white" />
+          <div class=" p-1 rounded-lg transition-transform group-hover:rotate-12">
+            <img src="/logo.png" alt="Logo" class="w-25 h-25" />
           </div>
-          <span class="text-xl md:text-2xl font-display font-bold text-primary-dark tracking-tight">
+          <span class="text-xl md:text-2xl font-display font-bold text-p-d tracking-tight">
             SkinSense AI
           </span>
         </RouterLink>
