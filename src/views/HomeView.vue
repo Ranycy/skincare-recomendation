@@ -6,11 +6,6 @@ import { ArrowRight, MapPin, Activity, ShieldCheck, Sparkles } from 'lucide-vue-
 
 <template>
   <div class="relative min-h-screen overflow-hidden bg-gradient-to-b from-white via-[#fbfaf8] to-[#f6f3ef] pb-6">
-    <div class="absolute inset-0 pointer-events-none">
-      <div class="absolute -top-20 -left-20 h-72 w-72 rounded-full bg-p-d/12 blur-3xl"></div>
-      <div class="absolute top-12 right-0 h-96 w-96 rounded-full bg-p-d/12 blur-3xl"></div>
-      <div class="absolute bottom-0 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-p-d/8 blur-3xl"></div>
-    </div>
 
     <section class="relative container mx-auto px-12 md:px-50 pt-24 md:pt-25">
       <div class="grid items-center gap-8 lg:grid-cols-[1fr_auto]">
