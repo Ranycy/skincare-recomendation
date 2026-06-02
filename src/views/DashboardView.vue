@@ -3,11 +3,11 @@
     <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
       <div class="space-y-2">
         <h1 class="text-4xl md:text-5xl font-display font-bold text-gray-900 tracking-tight">
-          Hello, <span class="text-primary italic">SkinSync</span> User
+          Hello, <span class="text-primary italic">Ini Dashboard Kamu </span> 
         </h1>
         <p class="text-gray-500 flex items-center gap-2">
-          <Sparkles class="w-4 h-4 text-primary" />
-          Here's your personalized routine for today's environment.
+          <Lightbulb class="w-4 h-4 text-primary" />
+          Ini rutinitas skincare yang cocok buat kamu hari ini.
         </p>
       </div>
       
@@ -25,8 +25,8 @@
 
     <div class="grid lg:grid-cols-12 gap-12">
       <div class="lg:col-span-5 space-y-8">
-        <h2 class="text-2xl font-display font-bold text-gray-900 flex items-center space-x-3">
-          <span>Environmental Insight</span>
+        <h2 class="text-2xl font-display text-gray-700 flex items-center space-x-3">
+          <span>Kondisi Lingkungan</span>
         </h2>
         <WeatherCard :weather="store.weatherData" :alert="store.skinAlert" />
         
@@ -56,7 +56,7 @@
       <!-- Right Column: Recommendations -->
       <div class="lg:col-span-7 space-y-8">
         <div class="flex items-center justify-between">
-          <h2 class="text-2xl font-display font-bold text-gray-900">Recommended for You Today</h2>
+          <h2 class="text-2xl font-display text-gray-700 flex items-center space-x-3">Rekomendasi Hari Ini</h2>
           <span class="text-xs font-bold uppercase tracking-widest text-primary px-3 py-1 bg-primary/10 rounded-full">
             {{ store.recommendations.length }} Matches
           </span>
@@ -88,7 +88,7 @@
   </div>
 </template>
 <script setup>
-import { Sparkles, RefreshCcw, Settings } from "lucide-vue-next";
+import { Sparkles, RefreshCcw, Settings, Lightbulb } from "lucide-vue-next";
 import { useAnalysisStore } from "../stores/useAnalysisStore";
 import ProductCard from "../components/ProductCard.vue";
 import ProductModal from "../components/ProductModal.vue";

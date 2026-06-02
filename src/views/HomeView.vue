@@ -1,6 +1,6 @@
 <script setup>
 import { RouterLink } from 'vue-router';
-import { ArrowRight, MapPin, Activity, ShieldCheck, Sparkles } from 'lucide-vue-next';
+import { ArrowRight, MapPin, Activity, ShieldCheck, Star } from 'lucide-vue-next';
 
 </script>
 
@@ -11,8 +11,9 @@ import { ArrowRight, MapPin, Activity, ShieldCheck, Sparkles } from 'lucide-vue-
       <div class="grid items-center gap-8 lg:grid-cols-[1fr_auto]">
           <div class="max-w-4xl space-y-8">
           <div class="inline-flex items-center space-x-2 px-4 py-2 bg-primary/10 rounded-full text-primary font-bold text-sm animate-bounce">
-            <Sparkles class="w-4 h-4" />
+            <Star class="w-4 h-4" />
             <span>SkinSense AI</span>
+            <Star class="w-4 h-4" />
           </div>
 
 

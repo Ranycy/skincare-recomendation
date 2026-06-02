@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { RouterLink } from 'vue-router';
-import { Sparkles, Menu, X } from 'lucide-vue-next';
+import { Sparkles, Menu, X, Leaf } from 'lucide-vue-next';
 
 const isMenuOpen = ref(false);
 const navLinks = [
@@ -17,7 +17,7 @@ const navLinks = [
       <div class="flex items-center justify-between h-16 md:h-20">
         <RouterLink to="/" class="flex items-center space-x-2 group">
           <div class=" p-1 rounded-lg transition-transform group-hover:rotate-12">
-            <img src="/logo.png" alt="Logo" class="w-25 h-25" />
+            <Leaf class="w-6 h-6 text-primary" />
           </div>
           <span class="text-xl md:text-2xl font-display font-bold text-p-d tracking-tight">
             SkinSense AI

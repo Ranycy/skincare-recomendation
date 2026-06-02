@@ -45,6 +45,10 @@ h6 {
     @apply bg-secondary text-primary-dark px-6 py-3 rounded-full font-medium transition-all duration-300 hover:bg-secondary-dark hover:shadow-md active:scale-95;
   }
 
+  .btn-s-light {
+    @apply bg-s-l/50 text-s font-bold px-4 py-2 rounded-full font-medium transition-all duration-300 hover:bg-s-l/80 hover:shadow-sm active:scale-95;
+  }
+
   .card {
     @apply bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-md;
   }
