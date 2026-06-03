@@ -1,0 +1,534 @@
+{
+  "info": {
+    "name": "SkinSense AI — API",
+    "description": "API collection untuk SkinSense AI Backend\nCapstone Pijak × IBM SkillsBuild — PJK-GM066\n\nSetup:\n1. Jalankan `python run.py` di folder back-end/\n2. Set variable `base_url` ke http://localhost:5000\n3. Set variable `weatherapi_key` di .env\n4. Jalankan Register/Login dulu → token otomatis tersimpan",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "guest_user_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "guest_session_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "questionnaire_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "Homepage (HTML)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/",
+              "host": ["{{base_url}}"],
+              "path": [""]
+            },
+            "description": "Halaman utama — menampilkan system status dan API documentation"
+          }
+        },
+        {
+          "name": "Status (JSON)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "status"]
+            },
+            "description": "JSON health check — model status, DB, WeatherAPI key"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var json = pm.response.json();",
+                  "    pm.collectionVariables.set('token', json.token);",
+                  "    pm.collectionVariables.set('user_id', json.user_id);",
+                  "    pm.test('Register berhasil — token & user_id tersimpan', function () {",
+                  "        pm.expect(json.token).to.be.a('string');",
+                  "        pm.expect(json.user_id).to.be.a('string');",
+                  "        pm.expect(json.email).to.be.a('string');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@skinsense.ai\",\n  \"password\": \"password123\",\n  \"name\": \"Test User\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Register user baru. Token otomatis tersimpan ke collection variable."
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var json = pm.response.json();",
+                  "    pm.collectionVariables.set('token', json.token);",
+                  "    pm.collectionVariables.set('user_id', json.user_id);",
+                  "    pm.test('Login berhasil — token & user_id tersimpan', function () {",
+                  "        pm.expect(json.token).to.be.a('string');",
+                  "        pm.expect(json.user_id).to.be.a('string');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@skinsense.ai\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Login dengan email & password. Token otomatis tersimpan ke collection variable."
+          }
+        },
+        {
+          "name": "Guest Session",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var json = pm.response.json();",
+                  "    pm.collectionVariables.set('guest_user_id', json.user_id);",
+                  "    pm.collectionVariables.set('guest_session_token', json.session_token);",
+                  "    pm.test('Guest session dibuat — user_id & session_token tersimpan', function () {",
+                  "        pm.expect(json.user_id).to.be.a('string');",
+                  "        pm.expect(json.session_token).to.be.a('string');",
+                  "        pm.expect(json.expires_at).to.be.a('string');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/auth/guest",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "guest"]
+            },
+            "description": "Buat guest session tanpa register. session_token otomatis tersimpan."
+          }
+        },
+        {
+          "name": "Me (Current User)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Get current user berhasil', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.user_id).to.be.a('string');",
+                  "    pm.expect(json).to.have.property('email');",
+                  "    pm.expect(json).to.have.property('is_guest');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "me"]
+            },
+            "description": "Get info user yang sedang login. Butuh token dari Register/Login."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Recommend",
+      "item": [
+        {
+          "name": "Recommend — Moisturizer (Registered User)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var json = pm.response.json();",
+                  "    pm.collectionVariables.set('questionnaire_id', json.questionnaire_id);",
+                  "    pm.test('Rekomendasi berhasil', function () {",
+                  "        pm.expect(json.questionnaire_id).to.be.a('string');",
+                  "        pm.expect(json.weather).to.have.property('temperature');",
+                  "        pm.expect(json.weather).to.have.property('humidity');",
+                  "        pm.expect(json.weather).to.have.property('uv_index');",
+                  "        pm.expect(json.weather).to.have.property('pm25');",
+                  "        pm.expect(json.recommendations).to.be.an('array');",
+                  "        pm.expect(json.recommendations.length).to.be.greaterThan(0);",
+                  "        pm.expect(json.recommendations[0]).to.have.property('rank');",
+                  "        pm.expect(json.recommendations[0]).to.have.property('product_name');",
+                  "        pm.expect(json.recommendations[0]).to.have.property('score');",
+                  "        pm.expect(json.recommendations[0]).to.have.property('why_recommended');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{user_id}}\",\n  \"questionnaire\": {\n    \"product_category\": \"moisturizer\",\n    \"skin_type\": \"oily\",\n    \"skin_concerns\": [\"acne\", \"dullness\"],\n    \"activity_type\": null,\n    \"avoided_ingredients\": [\"retinol\"]\n  },\n  \"location\": {\n    \"lat\": -6.2088,\n    \"lon\": 106.8456,\n    \"method\": \"gps\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/recommend",
+              "host": ["{{base_url}}"],
+              "path": ["api", "recommend"]
+            },
+            "description": "Rekomendasi moisturizer untuk registered user.\nLokasi: Jakarta. Kulit: oily. Concern: acne + dullness."
+          }
+        },
+        {
+          "name": "Recommend — Sunscreen Outdoor (Registered User)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var json = pm.response.json();",
+                  "    pm.test('Rekomendasi sunscreen berhasil', function () {",
+                  "        pm.expect(json.recommendations).to.be.an('array');",
+                  "        json.recommendations.forEach(function(rec) {",
+                  "            pm.expect(rec.category).to.equal('sunscreen');",
+                  "        });",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{user_id}}\",\n  \"questionnaire\": {\n    \"product_category\": \"sunscreen\",\n    \"skin_type\": \"combination\",\n    \"skin_concerns\": [\"aging\", \"dark spots\"],\n    \"activity_type\": \"outdoor\",\n    \"avoided_ingredients\": []\n  },\n  \"location\": {\n    \"lat\": -2.9909,\n    \"lon\": 104.7566,\n    \"method\": \"gps\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/recommend",
+              "host": ["{{base_url}}"],
+              "path": ["api", "recommend"]
+            },
+            "description": "Rekomendasi sunscreen outdoor.\nLokasi: Palembang. Kulit: combination. Concern: aging + dark spots.\nactivity_type = outdoor → SPF tinggi diprioritaskan."
+          }
+        },
+        {
+          "name": "Recommend — Cleanser (Guest User)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var json = pm.response.json();",
+                  "    pm.test('Rekomendasi guest berhasil', function () {",
+                  "        pm.expect(json.recommendations).to.be.an('array');",
+                  "        pm.expect(json.recommendations.length).to.be.greaterThan(0);",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"session_token\": \"{{guest_session_token}}\",\n  \"questionnaire\": {\n    \"product_category\": \"cleanser\",\n    \"skin_type\": \"sensitive\",\n    \"skin_concerns\": [\"dehydration\"],\n    \"activity_type\": null,\n    \"avoided_ingredients\": [\"alcohol\", \"fragrance\"]\n  },\n  \"location\": {\n    \"lat\": -7.7956,\n    \"lon\": 110.3695,\n    \"method\": \"manual_map\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/recommend",
+              "host": ["{{base_url}}"],
+              "path": ["api", "recommend"]
+            },
+            "description": "Rekomendasi cleanser sebagai guest user.\nLokasi: Yogyakarta (manual map). Kulit: sensitive. Concern: dehydration.\nHindari: alcohol & fragrance."
+          }
+        },
+        {
+          "name": "Recommend — Face Mask (No User)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var json = pm.response.json();",
+                  "    pm.test('Rekomendasi tanpa user berhasil', function () {",
+                  "        pm.expect(json.recommendations).to.be.an('array');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"questionnaire\": {\n    \"product_category\": \"face mask\",\n    \"skin_type\": \"dry\",\n    \"skin_concerns\": [\"dehydration\", \"dullness\"],\n    \"activity_type\": null,\n    \"avoided_ingredients\": []\n  },\n  \"location\": {\n    \"lat\": -8.6500,\n    \"lon\": 115.2167,\n    \"method\": \"gps\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/recommend",
+              "host": ["{{base_url}}"],
+              "path": ["api", "recommend"]
+            },
+            "description": "Rekomendasi face mask tanpa user_id/session_token.\nLokasi: Bali. Kulit: dry. Concern: dehydration + dullness."
+          }
+        },
+        {
+          "name": "Recommend — Eye Cream",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{user_id}}\",\n  \"questionnaire\": {\n    \"product_category\": \"eye cream\",\n    \"skin_type\": \"normal\",\n    \"skin_concerns\": [\"aging\"],\n    \"activity_type\": null,\n    \"avoided_ingredients\": []\n  },\n  \"location\": {\n    \"lat\": -6.9175,\n    \"lon\": 107.6191,\n    \"method\": \"gps\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/recommend",
+              "host": ["{{base_url}}"],
+              "path": ["api", "recommend"]
+            },
+            "description": "Rekomendasi eye cream.\nLokasi: Bandung. Kulit: normal. Concern: aging."
+          }
+        },
+        {
+          "name": "Recommend — Invalid Category (Error Test)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Harus error 400 untuk kategori tidak valid', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.error).to.include('Invalid product_category');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"questionnaire\": {\n    \"product_category\": \"serum\",\n    \"skin_type\": \"oily\",\n    \"skin_concerns\": []\n  },\n  \"location\": {\n    \"lat\": -6.2088,\n    \"lon\": 106.8456,\n    \"method\": \"gps\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/recommend",
+              "host": ["{{base_url}}"],
+              "path": ["api", "recommend"]
+            },
+            "description": "Test error: kategori 'serum' tidak valid. Harus return 400."
+          }
+        },
+        {
+          "name": "Recommend — Missing Location (Error Test)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Harus error 400 tanpa lokasi', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.error).to.include('Location');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"questionnaire\": {\n    \"product_category\": \"moisturizer\",\n    \"skin_type\": \"oily\",\n    \"skin_concerns\": []\n  },\n  \"location\": {}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/recommend",
+              "host": ["{{base_url}}"],
+              "path": ["api", "recommend"]
+            },
+            "description": "Test error: lokasi kosong. Harus return 400."
+          }
+        }
+      ]
+    },
+    {
+      "name": "History",
+      "item": [
+        {
+          "name": "Get History (Registered User)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('History berhasil diambil', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.history).to.be.an('array');",
+                  "    if (json.history.length > 0) {",
+                  "        var entry = json.history[0];",
+                  "        pm.expect(entry).to.have.property('questionnaire_id');",
+                  "        pm.expect(entry).to.have.property('weather');",
+                  "        pm.expect(entry).to.have.property('recommendations');",
+                  "        pm.expect(entry).to.have.property('created_at');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/history",
+              "host": ["{{base_url}}"],
+              "path": ["api", "history"]
+            },
+            "description": "Ambil semua riwayat rekomendasi untuk user yang login.\nJalankan beberapa Recommend request dulu agar ada data."
+          }
+        },
+        {
+          "name": "Get History — No Token (Error Test)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Harus error 401 tanpa token', function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/history",
+              "host": ["{{base_url}}"],
+              "path": ["api", "history"]
+            },
+            "description": "Test error: akses history tanpa Authorization header. Harus 401."
+          }
+        }
+      ]
+    }
+  ]
+}
