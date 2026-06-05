@@ -14,7 +14,7 @@
         <!-- Skin Type selection -->
         <div class="space-y-4">
           <label class="text-sm font-bold uppercase tracking-widest text-gray-400">Jenis kulit kamu</label>
-          <div class="grid grid-cols-5 sm:grid-cols-3 gap-5">
+          <div class="grid grid-cols-3 sm:grid-cols-5 gap-3">
             <button 
               v-for="type in skinTypes" 
               :key="type"
