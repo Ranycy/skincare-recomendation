@@ -21,7 +21,7 @@ const routes = [
         component: DashboardView,
         beforeEnter: (to, from, next) => {
             const store = useAnalysisStore();
-            if (!store.userProfile.isSet && to.name !== 'profile') {
+            if (!store.hasResult && to.name !== 'profile') {
                 next({name: 'profile'});
             } else {
                 next();
