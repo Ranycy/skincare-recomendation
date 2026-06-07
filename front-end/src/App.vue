@@ -1,12 +1,13 @@
 <script setup>
 import { RouterView } from 'vue-router';
-import HelloWorld from './components/HelloWorld.vue'
+import { Toaster } from 'vue-sonner';
+import 'vue-sonner/style.css';
 import Navbar from './components/Navbar.vue'
 import Footer from './components/Footer.vue'
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col">
+  <div class="app-shell min-h-screen flex flex-col">
     <Navbar />
     <main class="flex-grow">
       <router-view v-slot="{ Component }">
@@ -16,5 +17,6 @@ import Footer from './components/Footer.vue'
       </router-view>
     </main>
     <Footer />
+    <Toaster position="top-center" rich-colors close-button />
   </div>
 </template>

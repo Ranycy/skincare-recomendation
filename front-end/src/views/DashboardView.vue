@@ -1,111 +1,122 @@
 <template>
-  <div class="container mx-auto px-4 md:px-6 py-12 md:py-16 space-y-16">
-    <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+  <div class="page-container section-pad">
+    <header class="mb-7 space-y-5">
       <div class="space-y-2">
-        <h1 class="text-4xl md:text-5xl font-display font-bold text-gray-900 tracking-tight">
-          Hello, <span class="text-primary italic">Ini Dashboard Kamu </span> 
+        <span class="badge">Daily result</span>
+        <h1 class="text-4xl font-bold tracking-tight text-p-d sm:text-5xl">
+          Dashboard rekomendasi
         </h1>
-        <p class="text-gray-500 flex items-center gap-2">
-          <Lightbulb class="w-4 h-4 text-primary" />
-          Ini rutinitas skincare yang cocok buat kamu hari ini.
+        <p class="max-w-2xl text-sm leading-6 text-gray-600 sm:text-base">
+          Rekomendasi hari ini dibuat dari profil kulit, kondisi cuaca, dan preferensi kandungan yang kamu isi.
         </p>
       </div>
-      
-      <div class="flex items-center space-x-3">
-        <button 
+
+      <div class="grid grid-cols-2 gap-3 sm:flex sm:items-center">
+        <button
           @click="handleRefresh"
           :disabled="store.isLoading"
-          class="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-100 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          class="btn-secondary min-h-12"
         >
-          <RefreshCcw class="w-4 h-4" :class="{ 'animate-spin': store.isLoading }" />
-          <span>{{ store.isLoading ? 'Refreshing...' : 'Refresh Data' }}</span>
+          <RefreshCcw class="h-4 w-4" :class="{ 'animate-spin': store.isLoading }" />
+          <span>{{ store.isLoading ? 'Refreshing' : 'Refresh' }}</span>
         </button>
-        <RouterLink to="/profile" class="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-100 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">
-          <Settings class="w-4 h-4" />
-          <span>Edit Profile</span>
+        <RouterLink to="/profile" class="btn-secondary min-h-12">
+          <Settings class="h-4 w-4" />
+          <span>Edit</span>
         </RouterLink>
       </div>
     </header>
 
-    <div class="grid lg:grid-cols-12 gap-12">
-      <div class="lg:col-span-5 space-y-8">
-        <h2 class="text-2xl font-display text-gray-700 flex items-center space-x-3">
-          <span>Kondisi Lingkungan</span>
-        </h2>
-        <WeatherCard :weather="store.weatherData" :alert="store.skinAlert" />
-        
-        <div class="bg-primary/5 p-6 md:p-8 rounded-[2rem] border border-primary/10">
-          <h3 class="font-bold text-gray-900 mb-4">Current Profile Match</h3>
-          <div class="space-y-4">
-            <div class="flex justify-between items-center text-sm">
-              <span class="text-gray-500">Skin Type</span>
-              <span class="font-bold text-primary">{{ store.userProfile.skinType }}</span>
+    <div class="grid gap-6 lg:grid-cols-[minmax(20rem,0.85fr)_minmax(0,1.15fr)] lg:items-start">
+      <aside class="space-y-5">
+        <WeatherCard v-if="store.weatherData" :weather="store.weatherData" :alert="store.skinAlert" />
+
+        <section class="soft-card p-5">
+          <div class="mb-5 flex items-start justify-between gap-4">
+            <div>
+              <p class="eyebrow">Profile match</p>
+              <h2 class="mt-1 text-xl font-bold text-p-d">Kondisi pilihanmu</h2>
             </div>
-            <div class="flex justify-between items-center text-sm">
-              <span class="text-gray-500">Product Category</span>
-              <span class="font-bold text-primary">{{ store.userProfile.productCategory }}</span>
+            <span class="badge">{{ store.recommendations.length }} matches</span>
+          </div>
+
+          <div class="space-y-4 text-sm">
+            <div class="flex items-center justify-between gap-4">
+              <span class="text-gray-500">Skin type</span>
+              <strong class="text-right text-primary-dark">{{ store.userProfile.skinType }}</strong>
             </div>
-            <div class="flex justify-between items-start text-sm">
-              <span class="text-gray-500">Target Concerns</span>
-              <div class="flex flex-wrap justify-end gap-2 max-w-[150px]">
-                <span 
-                  v-for="concern in store.userProfile.concerns" 
+            <div class="flex items-center justify-between gap-4">
+              <span class="text-gray-500">Kategori</span>
+              <strong class="text-right text-primary-dark">{{ store.userProfile.productCategory }}</strong>
+            </div>
+            <div class="space-y-2">
+              <span class="text-gray-500">Concern</span>
+              <div class="flex flex-wrap gap-2">
+                <span
+                  v-for="concern in store.userProfile.concerns"
                   :key="concern"
-                  class="px-2 py-0.5 bg-white rounded-md text-[10px] font-bold text-gray-600 border border-gray-100 shadow-sm"
+                  class="rounded-full border border-primary/10 bg-primary/5 px-3 py-1 text-xs font-bold text-primary-dark"
                 >
                   {{ concern }}
+                </span>
+                <span v-if="store.userProfile.concerns.length === 0" class="text-xs font-semibold text-gray-400">
+                  Tidak ada concern khusus
                 </span>
               </div>
             </div>
           </div>
-        </div>
+        </section>
 
-        <div v-if="store.error" class="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+        <div v-if="store.error" class="rounded-3xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
           {{ store.error }}
         </div>
-      </div>
+      </aside>
 
-      <!-- Right Column: Recommendations -->
-      <div class="lg:col-span-7 space-y-8">
-        <div class="flex items-center justify-between">
-          <h2 class="text-2xl font-display text-gray-700 flex items-center space-x-3">Rekomendasi Hari Ini</h2>
-          <span class="text-xs font-bold uppercase tracking-widest text-primary px-3 py-1 bg-primary/10 rounded-full">
-            {{ store.recommendations.length }} Matches
+      <section class="space-y-4">
+        <div class="flex items-end justify-between gap-4">
+          <div>
+            <p class="eyebrow">Recommendation</p>
+            <h2 class="mt-1 text-2xl font-bold text-p-d">Produk paling cocok</h2>
+          </div>
+          <span class="hidden rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-primary md:inline-flex">
+            {{ store.recommendations.length }} matches
           </span>
         </div>
 
-        <div class="grid sm:grid-cols-2 gap-6">
-          <ProductCard 
-            v-for="product in store.recommendations" 
-            :key="product.id" 
-            :product="product" 
+        <div v-if="store.recommendations.length > 0" class="grid gap-4 sm:grid-cols-2">
+          <ProductCard
+            v-for="product in store.recommendations"
+            :key="product.id"
+            :product="product"
             @view-details="openDetails"
           />
         </div>
 
-        <!-- Empty state if no recommendations -->
-        <div v-if="store.recommendations.length === 0" class="bg-gray-50 rounded-3xl p-12 text-center border-2 border-dashed border-gray-200">
-          <p class="text-gray-500 font-medium">Backend tidak mengembalikan rekomendasi untuk profil dan cuaca saat ini.</p>
+        <div v-else class="soft-card p-8 text-center">
+          <p class="text-sm font-semibold text-gray-500">
+            Backend tidak mengembalikan rekomendasi untuk profil dan cuaca saat ini.
+          </p>
         </div>
-      </div>
+      </section>
     </div>
 
-    <!-- Modal -->
-    <ProductModal 
-      v-if="selectedProduct" 
-      :product="selectedProduct" 
-      :is-open="isModalOpen" 
-      @close="isModalOpen = false" 
+    <ProductModal
+      v-if="selectedProduct"
+      :product="selectedProduct"
+      :is-open="isModalOpen"
+      @close="isModalOpen = false"
     />
   </div>
 </template>
+
 <script setup>
-import { RefreshCcw, Settings, Lightbulb } from "lucide-vue-next";
+import { RefreshCcw, Settings } from "lucide-vue-next";
 import { useAnalysisStore } from "../stores/useAnalysisStore";
 import ProductCard from "../components/ProductCard.vue";
 import ProductModal from "../components/ProductModal.vue";
 import WeatherCard from "../components/WeatherCard.vue";
 import { ref } from "vue";
+import { notifyError, notifySuccess } from "../utils/notifications";
 
 const store = useAnalysisStore();
 
@@ -120,11 +131,9 @@ const openDetails = (product) => {
 const handleRefresh = async () => {
   try {
     await store.refreshAnalysis();
+    notifySuccess('Data diperbarui', 'Rekomendasi terbaru sudah dimuat ulang.');
   } catch (error) {
-    // Store already exposes the user-facing error message.
+    notifyError('Refresh gagal', store.error || error.message);
   }
 };
 </script>
-<style lang="">
-  
-</style>

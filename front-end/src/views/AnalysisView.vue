@@ -1,171 +1,142 @@
-
 <template>
-  <div class="min-h-[calc(100vh-80px)] flex items-center justify-center py-20 px-4">
-    <div class="max-w-xl w-full bg-white rounded-[2.5rem] shadow-2xl shadow-s\p-d/70 p-8 md:p-12 space-y-10 border border-gray-100">
-      <div class="text-center space-y-2">
-        <div class="w-16 h-16 bg-s-l/50 rounded-2xl flex items-center justify-center mx-auto mb-6">
-          <Flower class="w-10 h-10 text-s " />
+  <div class="page-container section-pad">
+    <div class="mx-auto max-w-3xl">
+      <div class="mb-6 space-y-3">
+        <span class="badge">Skin profile</span>
+        <div class="space-y-2">
+          <h1 class="text-4xl font-bold tracking-tight text-p-d sm:text-5xl">Profil kulit kamu</h1>
+          <p class="text-sm leading-6 text-gray-600 sm:text-base">
+            Jawaban ini dipakai untuk mengambil cuaca dari lokasi kamu dan mencocokkannya dengan rekomendasi produk.
+          </p>
         </div>
-        <h1 class="text-3xl font-display font-bold text-gray-900">Profil Kulit Kamu</h1>
-        <p class="text-gray-500">Yuk, ceritakan kondisi kulitmu supaya rekomendasinya makin pas.</p>
       </div>
 
-      <div class="space-y-10">
-        <!-- Skin Type selection -->
-        <div class="space-y-4">
-          <label class="text-sm font-bold uppercase tracking-widest text-gray-400">Jenis kulit kamu</label>
-          <div class="grid grid-cols-5 sm:grid-cols-3 gap-5">
-            <button 
-              v-for="type in skinTypes" 
-              :key="type"
-              @click="form.skinType = type"
-              :class="[
-                'px-4 py-3 rounded-xl border-2 text-sm font-medium transition-all duration-200',
-                form.skinType === type 
-                  ? 'border-s bg-primary/5 text-s shadow-sm font-semibold' 
-                  : 'border-gray-100 bg-gray-50 text-gray-600 hover:border-gray-200'
-              ]"
-            >
-              {{ type }}
-            </button>
-          </div>
-        </div>
-
-        <!-- Skin concerns selection -->
-        <div class="space-y-4">
-          <label class="text-sm font-bold uppercase tracking-widest text-gray-400">Masalah kulit yang kamu alami</label>
-          <div class="flex flex-wrap gap-3">
-            <button 
-              v-for="concern in concerns" 
-              :key="concern"
-              @click="toggleConcern(concern)"
-              :class="[
-                'px-5 py-2.5 rounded-full border-2 text-sm font-medium flex items-center space-x-2 transition-all duration-200',
-                form.concerns.includes(concern)
-                  ? 'border-s bg-s text-white shadow-md' 
-                  : 'border-gray-100 bg-gray-50 text-gray-600 hover:border-gray-200'
-              ]"
-            >
-              <Check v-if="form.concerns.includes(concern)" class="w-4 h-4" />
-              <span>{{ concern }}</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Product selection -->
-        <div class="space-y-4">
-          <label class="text-sm font-bold uppercase tracking-widest text-gray-400">Produk yang kamu butuhkan (pilih satu)</label>
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <button 
-              v-for="prod in productCategories" 
-              :key="prod"
-              @click="form.productCategory = prod"
-              :class="[
-                'px-4 py-3 rounded-xl border-2 text-sm font-medium flex items-center justify-center space-x-2 transition-all duration-200',
-                form.productCategory === prod
-                  ? 'border-s bg-primary/5 text-s shadow-sm font-semibold' 
-                  : 'border-gray-100 bg-gray-50 text-gray-600 hover:border-gray-200'
-              ]"
-            >
-              <Check v-if="form.productCategory === prod" class="w-4 h-4 shrink-0" />
-              <span>{{ prod }}</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Daily activity (Only shows if Sunscreen is selected) -->
-        <div v-if="form.productCategory === 'Sunscreen'" class="space-y-4 p-5 bg-secondary-light/30 border border-secondary/30 rounded-2xl transition-all duration-300">
-          <label class="text-sm font-bold uppercase tracking-widest text-gray-600 block">Aktivitas Harian (Khusus Sunscreen)</label>
-          <p class="text-xs text-gray-500 mb-2 font-sans">Pilih aktivitas harian Anda untuk mencocokkan tingkat SPF yang paling sesuai.</p>
-          <div class="grid grid-cols-2 gap-3">
-            <button 
-              @click="form.activity = 'Indoor'"
-              :class="[
-                'px-4 py-3 rounded-xl border-2 text-sm font-medium transition-all duration-200',
-                form.activity === 'Indoor'
-                  ? 'border-s bg-s text-white shadow-sm font-semibold' 
-                  : 'border-gray-100 bg-gray-50 text-gray-600 hover:border-gray-200'
-              ]"
-            >
-              Indoor (Dalam Ruangan)
-            </button>
-            <button 
-              @click="form.activity = 'Outdoor'"
-              :class="[
-                'px-4 py-3 rounded-xl border-2 text-sm font-medium transition-all duration-200',
-                form.activity === 'Outdoor'
-                 ? 'border-s bg-s text-white shadow-sm font-semibold' 
-                  : 'border-gray-100 bg-gray-50 text-gray-600 hover:border-gray-200'
-              ]"
-            >
-              Outdoor (Luar Ruangan)
-            </button>
-          </div>
-        </div>
-
-        <!-- Allergies / Avoid ingredients selection -->
-        <div class="space-y-4">
-          <label class="text-sm font-bold uppercase tracking-widest text-gray-400">Alergi & Kandungan yang Dihindari</label>
-          <p class="text-xs text-gray-500 mb-2 font-sans">Kami akan memfilter produk yang mengandung bahan-bahan ini.</p>
-          
-          <div class="flex flex-wrap gap-2 mb-3">
-            <button 
-              v-for="ing in avoidOptions" 
-              :key="ing"
-              @click="toggleAvoid(ing)"
-              :class="[
-                'px-4 py-2 rounded-full border-2 text-xs font-medium flex items-center space-x-1.5 transition-all duration-200',
-                form.avoidIngredients.includes(ing)
-                  ? 'border-red-500 bg-red-50 text-red-600 shadow-sm font-semibold' 
-                  : 'border-gray-100 bg-gray-50 text-gray-600 hover:border-gray-200'
-              ]"
-            >
-              <Check v-if="form.avoidIngredients.includes(ing)" class="w-3.5 h-3.5 shrink-0" />
-              <span>{{ ing }}</span>
-            </button>
+      <section class="soft-card p-4 sm:p-6 lg:p-8">
+        <div class="space-y-8">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between gap-3">
+              <label class="eyebrow">Jenis kulit</label>
+              <span class="text-xs font-semibold text-gray-400">Wajib</span>
+            </div>
+            <div class="grid grid-cols-2 gap-3 sm:grid-cols-5">
+              <button
+                v-for="type in skinTypes"
+                :key="type"
+                @click="form.skinType = type"
+                :class="['field-chip min-h-12', form.skinType === type ? 'field-chip-active' : '']"
+              >
+                {{ type }}
+              </button>
+            </div>
           </div>
 
-          <div class="space-y-2">
-            <label class="text-xs font-semibold text-gray-500 font-sans">Bahan Kimia/Kandungan Khusus Lainnya</label>
-            <input 
-              type="text" 
+          <div class="space-y-3">
+            <label class="eyebrow">Masalah kulit</label>
+            <div class="flex flex-wrap gap-2.5">
+              <button
+                v-for="concern in concerns"
+                :key="concern"
+                @click="toggleConcern(concern)"
+                :class="[
+                  'field-chip inline-flex min-h-11 items-center gap-2 rounded-full px-4 py-2',
+                  form.concerns.includes(concern) ? 'field-chip-active' : ''
+                ]"
+              >
+                <Check v-if="form.concerns.includes(concern)" class="h-4 w-4" />
+                <span>{{ concern }}</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="space-y-3">
+            <div class="flex items-center justify-between gap-3">
+              <label class="eyebrow">Produk yang dibutuhkan</label>
+              <span class="text-xs font-semibold text-gray-400">Pilih satu</span>
+            </div>
+            <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <button
+                v-for="prod in productCategories"
+                :key="prod"
+                @click="form.productCategory = prod"
+                :class="[
+                  'field-chip flex min-h-14 items-center justify-center gap-2 text-center',
+                  form.productCategory === prod ? 'field-chip-active' : ''
+                ]"
+              >
+                <Check v-if="form.productCategory === prod" class="h-4 w-4 shrink-0" />
+                <span>{{ prod }}</span>
+              </button>
+            </div>
+          </div>
+
+          <div v-if="form.productCategory === 'Sunscreen'" class="rounded-3xl border border-primary/10 bg-accent-pink/45 p-4 sm:p-5">
+            <div class="mb-4 space-y-1">
+              <label class="eyebrow text-primary-dark">Aktivitas harian</label>
+              <p class="text-sm leading-6 text-gray-600">Khusus sunscreen, aktivitas membantu mencocokkan proteksi yang paling pas.</p>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <button
+                v-for="activity in activities"
+                :key="activity"
+                @click="form.activity = activity"
+                :class="['field-chip min-h-12', form.activity === activity ? 'field-chip-active' : '']"
+              >
+                {{ activity }}
+              </button>
+            </div>
+          </div>
+
+          <div class="space-y-3">
+            <label class="eyebrow">Kandungan yang dihindari</label>
+            <div class="flex flex-wrap gap-2.5">
+              <button
+                v-for="ing in avoidOptions"
+                :key="ing"
+                @click="toggleAvoid(ing)"
+                :class="[
+                  'field-chip inline-flex min-h-10 items-center gap-2 rounded-full px-4 py-2 text-xs',
+                  form.avoidIngredients.includes(ing) ? 'border-red-200 bg-red-50 text-red-700 ring-2 ring-red-100' : ''
+                ]"
+              >
+                <Check v-if="form.avoidIngredients.includes(ing)" class="h-3.5 w-3.5" />
+                <span>{{ ing }}</span>
+              </button>
+            </div>
+            <input
+              type="text"
               v-model="form.customAvoidIngredients"
-              placeholder="Contoh: Centella, Salicylic Acid (pisahkan dengan koma)" 
-              class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+              placeholder="Contoh: Centella, Salicylic Acid"
+              class="min-h-12 w-full rounded-2xl border border-primary/10 bg-white px-4 text-sm text-gray-700 shadow-sm outline-none transition focus:border-primary/30 focus:ring-4 focus:ring-primary/10"
             />
           </div>
         </div>
-      </div>
 
-      <!-- Submit button -->
-      <button 
-        @click="handleSubmit"
-        :disabled="!form.skinType || !form.productCategory || store.isLoading"
-        class="btn-s-light w-full py-4 flex items-center justify-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed mt-8 shadow-xl shadow-primary/20 font-semibold"
-      >
-        <Leaf class="w-5 h-5" :class="{ 'animate-pulse': store.isLoading }" />
-        <span>{{ store.isLoading ? 'Mengambil rekomendasi...' : 'Lihat Hasil Analisis' }}</span>
-        <ArrowRight v-if="!store.isLoading" class="w-5 h-5" />
-      </button>
+        <div class="sticky bottom-3 z-10 mt-8 rounded-3xl border border-white/70 bg-white/90 p-3 shadow-[0_18px_40px_rgba(45,62,39,0.14)] backdrop-blur-xl sm:static sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">
+          <button
+            @click="handleSubmit"
+            :disabled="!form.skinType || !form.productCategory || store.isLoading"
+            class="btn-primary min-h-14 w-full text-base"
+          >
+            <LoaderCircle v-if="store.isLoading" class="h-5 w-5 animate-spin" />
+            <Leaf v-else class="h-5 w-5" />
+            <span>{{ store.isLoading ? 'Menganalisis lokasi dan profil...' : 'Lihat rekomendasi saya' }}</span>
+          </button>
 
-      <div v-if="store.error" class="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-        {{ store.error }}
-      </div>
-
-      <p class="text-center text-xs text-gray-400 italic font-sans">
-        Kami menggunakan jawabanmu untuk memberikan rekomendasi yang lebih sesuai.
-      </p>
+          <div v-if="store.error" class="mt-3 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+            {{ store.error }}
+          </div>
+        </div>
+      </section>
     </div>
   </div>
 </template>
 
 <script setup>
-import { Leaf, Flower } from 'lucide-vue-next'
-import { useRouter } from 'vue-router';
-import {useAnalysisStore} from '../stores/useAnalysisStore';
 import { reactive } from 'vue';
-
-import { Check, ArrowRight } from 'lucide-vue-next';
+import { useRouter } from 'vue-router';
+import { Check, Leaf, LoaderCircle } from 'lucide-vue-next';
+import { useAnalysisStore } from '../stores/useAnalysisStore';
+import { notifyError, notifySuccess } from '../utils/notifications';
 
 const router = useRouter();
 const store = useAnalysisStore();
@@ -174,14 +145,15 @@ const skinTypes = ['Normal', 'Kering', 'Berminyak', 'Kombinasi', 'Sensitif'];
 const concerns = ['Jerawat', 'Kusam', 'Penuaan', 'Bekas jerawat', 'Dehidrasi'];
 const productCategories = ['Cleanser', 'Moisturizer', 'Masker', 'Eye cream', 'Sunscreen'];
 const avoidOptions = ['Alkohol', 'Fragrance', 'Paraben', 'Silikon', 'Sulfat'];
+const activities = ['Indoor', 'Outdoor'];
 
 const form = reactive({
   skinType: '',
-  concerns: [],          
-  productCategory: '',          
-  activity: 'Indoor',    
-  avoidIngredients: [],  
-  customAvoidIngredients: ''
+  concerns: [],
+  productCategory: '',
+  activity: 'Indoor',
+  avoidIngredients: [],
+  customAvoidIngredients: '',
 });
 
 const toggleConcern = (concern) => {
@@ -207,14 +179,10 @@ const handleSubmit = async () => {
 
   try {
     await store.submitAnalysis(form);
+    notifySuccess('Rekomendasi siap', 'Hasil sudah disesuaikan dengan profil dan cuaca saat ini.');
     router.push('/dashboard');
   } catch (error) {
-    // Store already exposes the user-facing error message.
+    notifyError('Gagal mengambil rekomendasi', store.error || error.message);
   }
 };
-
 </script>
-
-<style>
-    
-</style>

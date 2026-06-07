@@ -48,7 +48,7 @@ function readStoredAnalysisResult() {
 
 function normalizeWeather(weather = {}) {
   return {
-    location: "Current location",
+    location: weather.location_name || "Current location",
     temperature: weather.temperature,
     humidity: weather.humidity,
     uvIndex: weather.uv_index,
