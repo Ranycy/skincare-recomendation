@@ -54,27 +54,27 @@
 
         <!-- Product selection -->
         <div class="space-y-4">
-          <label class="text-sm font-bold uppercase tracking-widest text-gray-400">Produk yang kamu butuhkan (pilih minimal satu)</label>
+          <label class="text-sm font-bold uppercase tracking-widest text-gray-400">Produk yang kamu butuhkan (pilih satu)</label>
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
             <button 
               v-for="prod in productCategories" 
               :key="prod"
-              @click="toggleProduct(prod)"
+              @click="form.productCategory = prod"
               :class="[
                 'px-4 py-3 rounded-xl border-2 text-sm font-medium flex items-center justify-center space-x-2 transition-all duration-200',
-                form.products.includes(prod) 
+                form.productCategory === prod
                   ? 'border-s bg-primary/5 text-s shadow-sm font-semibold' 
                   : 'border-gray-100 bg-gray-50 text-gray-600 hover:border-gray-200'
               ]"
             >
-              <Check v-if="form.products.includes(prod)" class="w-4 h-4 shrink-0" />
+              <Check v-if="form.productCategory === prod" class="w-4 h-4 shrink-0" />
               <span>{{ prod }}</span>
             </button>
           </div>
         </div>
 
         <!-- Daily activity (Only shows if Sunscreen is selected) -->
-        <div v-if="form.products.includes('Sunscreen')" class="space-y-4 p-5 bg-secondary-light/30 border border-secondary/30 rounded-2xl transition-all duration-300">
+        <div v-if="form.productCategory === 'Sunscreen'" class="space-y-4 p-5 bg-secondary-light/30 border border-secondary/30 rounded-2xl transition-all duration-300">
           <label class="text-sm font-bold uppercase tracking-widest text-gray-600 block">Aktivitas Harian (Khusus Sunscreen)</label>
           <p class="text-xs text-gray-500 mb-2 font-sans">Pilih aktivitas harian Anda untuk mencocokkan tingkat SPF yang paling sesuai.</p>
           <div class="grid grid-cols-2 gap-3">
@@ -140,13 +140,17 @@
       <!-- Submit button -->
       <button 
         @click="handleSubmit"
-        :disabled="!form.skinType || form.products.length === 0"
+        :disabled="!form.skinType || !form.productCategory || store.isLoading"
         class="btn-s-light w-full py-4 flex items-center justify-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed mt-8 shadow-xl shadow-primary/20 font-semibold"
       >
-        <Leaf class="w-5 h-5 animate-pulse" />
-        <span>Lihat Hasil Analisis</span>
-        <ArrowRight class="w-5 h-5" />
+        <Leaf class="w-5 h-5" :class="{ 'animate-pulse': store.isLoading }" />
+        <span>{{ store.isLoading ? 'Mengambil rekomendasi...' : 'Lihat Hasil Analisis' }}</span>
+        <ArrowRight v-if="!store.isLoading" class="w-5 h-5" />
       </button>
+
+      <div v-if="store.error" class="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+        {{ store.error }}
+      </div>
 
       <p class="text-center text-xs text-gray-400 italic font-sans">
         Kami menggunakan jawabanmu untuk memberikan rekomendasi yang lebih sesuai.
@@ -156,10 +160,10 @@
 </template>
 
 <script setup>
-import { Leaf, Flower, Smile, Star } from 'lucide-vue-next'
+import { Leaf, Flower } from 'lucide-vue-next'
 import { useRouter } from 'vue-router';
 import {useAnalysisStore} from '../stores/useAnalysisStore';
-import { reactive, ref } from 'vue';
+import { reactive } from 'vue';
 
 import { Check, ArrowRight } from 'lucide-vue-next';
 
@@ -174,7 +178,7 @@ const avoidOptions = ['Alkohol', 'Fragrance', 'Paraben', 'Silikon', 'Sulfat'];
 const form = reactive({
   skinType: '',
   concerns: [],          
-  products: [],          
+  productCategory: '',          
   activity: 'Indoor',    
   avoidIngredients: [],  
   customAvoidIngredients: ''
@@ -189,15 +193,6 @@ const toggleConcern = (concern) => {
   }
 };
 
-const toggleProduct = (product) => {
-  const index = form.products.indexOf(product);
-  if (index === -1) {
-    form.products.push(product);
-  } else {
-    form.products.splice(index, 1);
-  }
-};
-
 const toggleAvoid = (ingredient) => {
   const index = form.avoidIngredients.indexOf(ingredient);
   if (index === -1) {
@@ -207,10 +202,15 @@ const toggleAvoid = (ingredient) => {
   }
 };
 
-const handleSubmit = () => {
-  if (!form.skinType || form.products.length === 0) return;
-  store.setProfile(form);
-  router.push('/dashboard');
+const handleSubmit = async () => {
+  if (!form.skinType || !form.productCategory || store.isLoading) return;
+
+  try {
+    await store.submitAnalysis(form);
+    router.push('/dashboard');
+  } catch (error) {
+    // Store already exposes the user-facing error message.
+  }
 };
 
 </script>
