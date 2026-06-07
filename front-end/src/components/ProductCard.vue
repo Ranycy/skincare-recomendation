@@ -1,62 +1,71 @@
 <template>
-  <div class="card group h-full flex flex-col cursor-pointer" @click="$emit('view-details', product)">
-    <div class="aspect-square bg-secondary-light relative overflow-hidden">
-      <div class="absolute inset-0 flex items-center justify-center text-primary/20">
-        <div class="text-4xl font-display font-bold">{{ product.brand?.[0] || "S" }}</div>
-      </div>
-      <div class="absolute top-3 left-3">
-        <span class="px-2.5 py-1 bg-white/90 backdrop-blur-sm text-[10px] font-bold uppercase tracking-wider rounded-full text-primary border border-primary/10">
-          {{ product.type }}
-        </span>
-      </div>
-      <div class="absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-colors duration-300"></div>
-    </div>
+  <article class="card group flex h-full cursor-pointer flex-col" @click="$emit('view-details', product)">
+    <div class="relative min-h-44 overflow-hidden bg-gradient-to-br from-accent-pink via-white to-primary/10 p-4">
+      <div class="absolute inset-0 opacity-70" :class="categoryWash"></div>
+      <div class="relative flex h-full min-h-36 flex-col justify-between">
+        <div class="flex items-start justify-between gap-3">
+          <span class="badge bg-white/80">{{ product.type }}</span>
+          <span class="rounded-full bg-white/85 px-3 py-1 text-xs font-bold text-primary-dark shadow-sm">
+            {{ product.matchScore }}%
+          </span>
+        </div>
 
-    <div class="p-5 flex-grow flex flex-col">
-      <div class="flex justify-between items-start mb-2">
-        <p class="text-xs font-medium text-gray-400 uppercase tracking-wide">{{ product.brand }}</p>
-        <div class="flex items-center text-primary">
-          <Percent class="w-3 h-3" />
-          <span class="text-xs font-bold ml-1">{{ product.matchScore }}%</span>
+        <div class="flex items-end justify-between gap-4">
+          <div>
+            <p class="text-xs font-bold uppercase tracking-[0.16em] text-primary/75">{{ product.brand }}</p>
+            <div class="mt-2 text-5xl font-display font-bold text-primary/20">
+              {{ product.brand?.[0] || "S" }}
+            </div>
+          </div>
+          <span class="rounded-2xl bg-primary-dark px-3 py-2 text-xs font-bold text-white shadow-sm">
+            #{{ product.rank }}
+          </span>
         </div>
       </div>
+    </div>
 
-      <h3 class="text-lg font-bold text-gray-900 mb-2 leading-tight group-hover:text-primary transition-colors">
-        {{ product.name }}
-      </h3>
+    <div class="flex flex-1 flex-col p-4">
+      <div class="mb-3 flex items-start justify-between gap-3">
+        <h3 class="text-base font-bold leading-snug text-gray-950 transition-colors group-hover:text-primary">
+          {{ product.name }}
+        </h3>
+        <span class="grid h-9 w-9 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary transition-all group-hover:bg-primary group-hover:text-white">
+          <ArrowRight class="h-4 w-4" />
+        </span>
+      </div>
 
-      <div class="flex flex-wrap gap-1.5 mb-4">
+      <div class="mb-4 flex flex-wrap gap-1.5">
         <span
-          v-for="ing in product.ingredients"
+          v-for="ing in visibleIngredients"
           :key="ing"
-          class="text-[10px] px-2 py-0.5 bg-gray-50 text-gray-500 rounded-md border border-gray-100"
+          class="rounded-full border border-gray-100 bg-gray-50 px-2.5 py-1 text-[10px] font-semibold text-gray-500"
         >
           {{ ing }}
         </span>
       </div>
 
-      <div class="mt-auto pt-4 border-t border-gray-50 space-y-3">
-        <div class="flex items-center justify-between">
-          <span class="text-lg font-display font-bold text-gray-900">Rank #{{ product.rank }}</span>
-          <button class="p-2 bg-primary/10 text-primary rounded-lg group-hover:bg-primary group-hover:text-white transition-all duration-300">
-            <ArrowRight class="w-4 h-4" />
-          </button>
-        </div>
-
-        <div class="bg-primary/5 p-2.5 rounded-xl">
-          <p class="text-[11px] text-primary-dark/80 leading-relaxed italic">
-            "{{ product.whyRecommended }}"
-          </p>
-        </div>
-      </div>
+      <p class="mt-auto line-clamp-3 rounded-2xl bg-primary/5 p-3 text-xs leading-5 text-primary-dark/85">
+        {{ product.whyRecommended }}
+      </p>
     </div>
-  </div>
+  </article>
 </template>
 
 <script setup>
-import { Percent, ArrowRight } from "lucide-vue-next";
+import { computed } from "vue";
+import { ArrowRight } from "lucide-vue-next";
 
-defineProps({
+const props = defineProps({
   product: Object,
+});
+
+const visibleIngredients = computed(() => (props.product?.ingredients || []).slice(0, 4));
+
+const categoryWash = computed(() => {
+  const type = props.product?.type || "";
+  if (type.includes("sunscreen")) return "bg-[radial-gradient(circle_at_75%_18%,rgba(245,158,11,0.20),transparent_12rem)]";
+  if (type.includes("cleanser")) return "bg-[radial-gradient(circle_at_75%_18%,rgba(59,130,246,0.16),transparent_12rem)]";
+  if (type.includes("mask")) return "bg-[radial-gradient(circle_at_75%_18%,rgba(255,222,222,0.92),transparent_12rem)]";
+  return "bg-[radial-gradient(circle_at_75%_18%,rgba(74,103,65,0.16),transparent_12rem)]";
 });
 </script>

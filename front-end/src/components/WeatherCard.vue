@@ -1,62 +1,49 @@
 <template>
-  <div class="space-y-6">
-    <div class="bg-gradient-to-br from-primary to-primary-dark p-6 md:p-8 rounded-3xl text-white shadow-xl relative overflow-hidden">
-      <div class="absolute top-0 right-0 -mr-8 -mt-8 w-48 h-48 bg-white/10 rounded-full blur-3xl"></div>
-
-      <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-          <div class="flex items-center space-x-2 text-primary-light mb-2">
-            <MapPin class="w-4 h-4" />
-            <span class="text-sm font-medium tracking-wide uppercase">{{ weather.location }}</span>
-          </div>
-          <h2 class="text-5xl font-display font-bold mb-2">{{ weather.temperature }}&deg;C</h2>
-          <p class="text-lg opacity-90 capitalize">{{ weather.condition }} Today</p>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-8">
-          <div class="flex items-center space-x-3">
-            <div class="p-2 bg-white/20 rounded-xl">
-              <Droplets class="w-5 h-5" />
-            </div>
-            <div>
-              <p class="text-xs opacity-70">Humidity</p>
-              <p class="font-bold">{{ weather.humidity }}%</p>
-            </div>
-          </div>
-
-          <div class="flex items-center space-x-3">
-            <div class="p-2 bg-white/20 rounded-xl">
-              <Sun class="w-5 h-5" />
-            </div>
-            <div>
-              <p class="text-xs opacity-70">UV Index</p>
-              <p class="font-bold">{{ weather.uvIndex }}</p>
-            </div>
-          </div>
-
-          <div class="flex items-center space-x-3">
-            <div class="p-2 bg-white/20 rounded-xl">
-              <Wind class="w-5 h-5" />
-            </div>
-            <div>
-              <p class="text-xs opacity-70">PM2.5</p>
-              <p class="font-bold">{{ weather.pm25 }} ug/m3</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="bg-amber-50 border border-amber-100 p-4 rounded-2xl flex items-start space-x-4">
-      <div class="p-2 bg-amber-100 rounded-full text-amber-600">
-        <ShieldAlert class="w-5 h-5" />
-      </div>
+  <section class="overflow-hidden rounded-3xl bg-gradient-to-br from-primary to-primary-dark p-5 text-white shadow-[0_18px_45px_rgba(45,62,39,0.20)]">
+    <div class="mb-6 flex items-start justify-between gap-4">
       <div>
-        <h4 class="font-bold text-amber-900 text-sm">Skin Condition Alert</h4>
-        <p class="text-amber-800 text-sm leading-relaxed">{{ alert }}</p>
+        <div class="mb-2 flex items-start gap-2 text-primary-light">
+          <MapPin class="h-4 w-4" />
+          <div class="min-w-0">
+            <span class="block text-[10px] font-bold uppercase tracking-[0.16em] text-primary-light/75">Scanned location</span>
+            <span class="mt-0.5 block max-w-[13rem] truncate text-xs font-bold uppercase tracking-[0.12em] text-white">
+              {{ weather.location }}
+            </span>
+          </div>
+        </div>
+        <h2 class="text-5xl font-display font-bold leading-none">{{ weather.temperature }}&deg;C</h2>
+        <p class="mt-2 text-sm font-semibold text-white/80">{{ weather.condition }} today</p>
+      </div>
+      <span class="rounded-2xl bg-white/15 px-3 py-2 text-xs font-bold text-white/90">
+        Live
+      </span>
+    </div>
+
+    <div class="grid grid-cols-3 gap-2">
+      <div class="rounded-2xl bg-white/12 p-3">
+        <Droplets class="mb-2 h-4 w-4 text-primary-light" />
+        <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/60">Humidity</p>
+        <p class="mt-1 text-sm font-bold">{{ weather.humidity }}%</p>
+      </div>
+      <div class="rounded-2xl bg-white/12 p-3">
+        <Sun class="mb-2 h-4 w-4 text-primary-light" />
+        <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/60">UV</p>
+        <p class="mt-1 text-sm font-bold">{{ weather.uvIndex }}</p>
+      </div>
+      <div class="rounded-2xl bg-white/12 p-3">
+        <Wind class="mb-2 h-4 w-4 text-primary-light" />
+        <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/60">PM2.5</p>
+        <p class="mt-1 text-sm font-bold">{{ weather.pm25 }}</p>
       </div>
     </div>
-  </div>
+
+    <div class="mt-4 rounded-2xl border border-white/10 bg-white/10 p-3">
+      <div class="flex gap-3">
+        <ShieldAlert class="mt-0.5 h-4 w-4 shrink-0 text-primary-light" />
+        <p class="text-sm leading-6 text-white/86">{{ alert }}</p>
+      </div>
+    </div>
+  </section>
 </template>
 
 <script setup>

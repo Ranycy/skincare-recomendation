@@ -107,6 +107,7 @@ def create_recommendation(data: dict) -> tuple[dict, int]:
     return {
         "questionnaire_id": profile.id,
         "weather": {
+            "location_name": weather_data.get("location_name", "Current location"),
             "temperature": weather_data["temperature"],
             "humidity": weather_data["humidity"],
             "uv_index": weather_data["uv_index"],
