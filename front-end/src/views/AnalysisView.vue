@@ -2,7 +2,7 @@
   <div class="page-container section-pad">
     <div class="mx-auto max-w-3xl">
       <div class="mb-6 space-y-3">
-        <span class="badge">Skin profile</span>
+        <span class="badge">Profil kulit</span>
         <div class="space-y-2">
           <h1 class="text-4xl font-bold tracking-tight text-p-d sm:text-5xl">Profil kulit kamu</h1>
           <p class="text-sm leading-6 text-gray-600 sm:text-base">
@@ -112,6 +112,14 @@
         </div>
 
         <div class="sticky bottom-3 z-10 mt-8 rounded-3xl border border-white/70 bg-white/90 p-3 shadow-[0_18px_40px_rgba(45,62,39,0.14)] backdrop-blur-xl sm:static sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">
+          <label v-if="auth.isAuthenticated" class="mb-3 flex items-start gap-3 rounded-2xl bg-primary/5 px-4 py-3 text-sm font-semibold text-primary-dark">
+            <input v-model="saveProfile" type="checkbox" class="mt-1 h-4 w-4 accent-primary" />
+            <span>Simpan pilihan ini sebagai profil kulit utama saya.</span>
+          </label>
+          <div v-else class="mb-3 rounded-2xl bg-accent-pink/55 px-4 py-3 text-sm font-semibold text-s-d">
+            Login untuk menyimpan profil kulit dan melihat riwayat rekomendasi.
+          </div>
+
           <button
             @click="handleSubmit"
             :disabled="!form.skinType || !form.productCategory || store.isLoading"
@@ -132,14 +140,17 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue';
+import { onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { Check, Leaf, LoaderCircle } from 'lucide-vue-next';
 import { useAnalysisStore } from '../stores/useAnalysisStore';
+import { useAuthStore } from '../stores/useAuthStore';
 import { notifyError, notifySuccess } from '../utils/notifications';
 
 const router = useRouter();
 const store = useAnalysisStore();
+const auth = useAuthStore();
+const saveProfile = ref(true);
 
 const skinTypes = ['Normal', 'Kering', 'Berminyak', 'Kombinasi', 'Sensitif'];
 const concerns = ['Jerawat', 'Kusam', 'Penuaan', 'Bekas jerawat', 'Dehidrasi'];
@@ -154,6 +165,28 @@ const form = reactive({
   activity: 'Indoor',
   avoidIngredients: [],
   customAvoidIngredients: '',
+});
+
+function applyFormValues(values) {
+  if (!values) return;
+
+  form.skinType = values.skinType || '';
+  form.concerns = [...(values.concerns || [])];
+  form.productCategory = values.productCategory || '';
+  form.activity = values.activity || 'Indoor';
+  form.avoidIngredients = [...(values.avoidIngredients || [])];
+  form.customAvoidIngredients = values.customAvoidIngredients || '';
+}
+
+onMounted(async () => {
+  if (!auth.isAuthenticated) return;
+
+  try {
+    const savedForm = await store.loadSavedSkinProfile();
+    applyFormValues(savedForm);
+  } catch (error) {
+    notifyError('Profil tersimpan gagal dimuat', error.message);
+  }
 });
 
 const toggleConcern = (concern) => {
@@ -179,6 +212,9 @@ const handleSubmit = async () => {
 
   try {
     await store.submitAnalysis(form);
+    if (auth.isAuthenticated && saveProfile.value) {
+      await store.saveSkinProfile(form);
+    }
     notifySuccess('Rekomendasi siap', 'Hasil sudah disesuaikan dengan profil dan cuaca saat ini.');
     router.push('/dashboard');
   } catch (error) {

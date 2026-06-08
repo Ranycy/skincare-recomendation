@@ -4,10 +4,19 @@
       <div class="absolute inset-0 opacity-70" :class="categoryWash"></div>
       <div class="relative flex h-full min-h-36 flex-col justify-between">
         <div class="flex items-start justify-between gap-3">
-          <span class="badge bg-white/80">{{ product.type }}</span>
-          <span class="rounded-full bg-white/85 px-3 py-1 text-xs font-bold text-primary-dark shadow-sm">
-            {{ product.matchScore }}%
-          </span>
+          <span class="badge bg-white/80">{{ product.displayType || product.type }}</span>
+          <div class="flex items-center gap-2">
+            <button
+              class="grid h-8 w-8 place-items-center rounded-full bg-white/85 text-primary-dark shadow-sm transition hover:bg-accent-pink"
+              @click.stop="$emit('toggle-save', product)"
+              aria-label="Simpan produk"
+            >
+              <Heart class="h-4 w-4" :class="{ 'fill-primary text-primary': isSaved }" />
+            </button>
+            <span class="rounded-full bg-white/85 px-3 py-1 text-xs font-bold text-primary-dark shadow-sm">
+              {{ product.matchScore }}%
+            </span>
+          </div>
         </div>
 
         <div class="flex items-end justify-between gap-4">
@@ -44,22 +53,37 @@
         </span>
       </div>
 
-      <p class="mt-auto line-clamp-3 rounded-2xl bg-primary/5 p-3 text-xs leading-5 text-primary-dark/85">
-        {{ product.whyRecommended }}
-      </p>
+      <div class="mt-auto space-y-2 rounded-2xl bg-primary/5 p-3">
+        <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-primary/70">Kenapa cocok</p>
+        <ul class="space-y-1.5">
+          <li
+            v-for="point in visibleReasons"
+            :key="point"
+            class="line-clamp-1 text-xs font-semibold leading-5 text-primary-dark/85"
+          >
+            {{ point }}
+          </li>
+        </ul>
+      </div>
     </div>
   </article>
 </template>
 
 <script setup>
 import { computed } from "vue";
-import { ArrowRight } from "lucide-vue-next";
+import { ArrowRight, Heart } from "lucide-vue-next";
 
 const props = defineProps({
   product: Object,
+  isSaved: Boolean,
 });
 
 const visibleIngredients = computed(() => (props.product?.ingredients || []).slice(0, 4));
+const visibleReasons = computed(() => {
+  const points = props.product?.summaryPoints || props.product?.explanationFactors?.summary_points || [];
+  if (points.length > 0) return points.slice(0, 2);
+  return [props.product?.whyRecommended || "Rekomendasi ini disesuaikan dengan profil dan cuaca saat ini."];
+});
 
 const categoryWash = computed(() => {
   const type = props.product?.type || "";

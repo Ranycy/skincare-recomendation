@@ -85,7 +85,7 @@ def map_weather_for_ml(weatherapi_response: dict, lat: float | None = None, lon:
     location_name = location_name or get_weatherapi_location_name(location)
 
     return {
-        "location_name": location_name or "Current location",
+        "location_name": location_name or "Lokasi saat ini",
         "temperature": current["temp_c"],
         "humidity": current["humidity"],
         "uv_index": current["uv"],

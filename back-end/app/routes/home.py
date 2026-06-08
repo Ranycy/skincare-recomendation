@@ -245,7 +245,7 @@ HOME_HTML = """
       "category": "sunscreen",
       "skin_types": ["oily", "combination"],
       "active_ingredients": ["niacinamide", "zinc oxide"],
-      "why_recommended": "Cocok karena sangat cocok untuk tipe kulit oily...",
+      "why_recommended": "Cocok karena cocok untuk kulit berminyak...",
       "score": 0.87
     }
   ]

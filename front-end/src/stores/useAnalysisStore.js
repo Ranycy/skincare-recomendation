@@ -1,8 +1,9 @@
 import { defineStore } from "pinia";
 import { computed, reactive, ref } from "vue";
-import { createGuestSession, requestRecommendation } from "../services/api";
+import { createGuestSession, getSkinProfile, requestAuthenticatedRecommendation, requestRecommendation, updateSkinProfile } from "../services/api";
 import { getCurrentLocation } from "../services/geolocation";
-import { deriveCondition, normalizeAnalysisForm } from "../utils/analysisMapping";
+import { deriveCondition, displayCategory, displaySkinType, mapBackendProfileToForm, normalizeAnalysisForm } from "../utils/analysisMapping";
+import { useAuthStore } from "./useAuthStore";
 
 const GUEST_SESSION_KEY = "skinsense_guest_session";
 const ANALYSIS_RESULT_KEY = "skinsense_analysis_result";
@@ -48,7 +49,7 @@ function readStoredAnalysisResult() {
 
 function normalizeWeather(weather = {}) {
   return {
-    location: weather.location_name || "Current location",
+    location: weather.location_name || "Lokasi saat ini",
     temperature: weather.temperature,
     humidity: weather.humidity,
     uvIndex: weather.uv_index,
@@ -64,9 +65,13 @@ function normalizeRecommendations(recommendations = []) {
     name: product.product_name,
     brand: product.brand,
     type: product.category,
+    displayType: displayCategory(product.category),
+    displaySkin: (product.skin_types || []).map((skin) => displaySkinType(skin)),
     skin: product.skin_types || [],
     ingredients: product.active_ingredients || [],
     whyRecommended: product.why_recommended,
+    explanationFactors: product.explanation_factors || null,
+    summaryPoints: product.explanation_factors?.summary_points || [],
     score: product.score,
     matchScore: Math.round((product.score || 0) * 100),
   }));
@@ -88,6 +93,10 @@ export const useAnalysisStore = defineStore("profile", () => {
   const location = ref(storedAnalysisResult?.location || null);
   const weatherData = ref(storedAnalysisResult?.weatherData || null);
   const recommendations = ref(storedAnalysisResult?.recommendations || []);
+  const questionnaireId = ref(storedAnalysisResult?.questionnaireId || "");
+  const weatherInsights = ref(storedAnalysisResult?.weatherInsights || []);
+  const routineSummary = ref(storedAnalysisResult?.routineSummary || null);
+  const savedSkinProfile = ref(null);
   const isLoading = ref(false);
   const error = ref("");
   const hasResult = ref(Boolean(storedAnalysisResult?.hasResult));
@@ -99,18 +108,18 @@ export const useAnalysisStore = defineStore("profile", () => {
     }
 
     if (weatherData.value.uvIndex >= 7) {
-      return "High UV today! Prioritize SPF protection and seek shade.";
+      return "UV sedang tinggi hari ini. Prioritaskan SPF dan cari tempat teduh saat di luar ruangan.";
     }
 
     if (weatherData.value.humidity > 70) {
-      return "High humidity detected. Use lightweight, non-comedogenic products.";
+      return "Kelembapan tinggi terdeteksi. Pilih tekstur ringan dan non-comedogenic.";
     }
 
     if (weatherData.value.humidity < 30) {
-      return "Dry air alert. Focus on barrier repair and deep hydration.";
+      return "Udara sedang kering. Fokus pada skin barrier dan hidrasi mendalam.";
     }
 
-    return "Weather looks stable. Stick to your usual routine!";
+    return "Cuaca stabil. Rutinitas dasar bisa tetap konsisten.";
   });
 
   async function getOrCreateGuestSession() {
@@ -153,6 +162,9 @@ export const useAnalysisStore = defineStore("profile", () => {
         location: location.value,
         weatherData: weatherData.value,
         recommendations: recommendations.value,
+        questionnaireId: questionnaireId.value,
+        weatherInsights: weatherInsights.value,
+        routineSummary: routineSummary.value,
         hasResult: hasResult.value,
         lastSubmittedForm: lastSubmittedForm.value,
       }),
@@ -164,21 +176,33 @@ export const useAnalysisStore = defineStore("profile", () => {
     isLoading.value = true;
 
     try {
+      const auth = useAuthStore();
       const normalized = normalizeAnalysisForm(form);
       const currentLocation = await getCurrentLocation();
-      const session = await getOrCreateGuestSession();
       const payload = {
-        user_id: session.user_id,
-        session_token: session.session_token,
         questionnaire: normalized.questionnaire,
         location: currentLocation,
       };
-      const result = await requestRecommendation(payload);
+
+      let result;
+      if (auth.isAuthenticated) {
+        result = await requestAuthenticatedRecommendation(payload, auth.token);
+      } else {
+        const session = await getOrCreateGuestSession();
+        result = await requestRecommendation({
+          ...payload,
+          user_id: session.user_id,
+          session_token: session.session_token,
+        });
+      }
 
       saveDisplayProfile(normalized.displayProfile);
       location.value = currentLocation;
       weatherData.value = normalizeWeather(result.weather);
       recommendations.value = normalizeRecommendations(result.recommendations);
+      questionnaireId.value = result.questionnaire_id || "";
+      weatherInsights.value = result.weather_insights || [];
+      routineSummary.value = result.routine_summary || null;
       hasResult.value = true;
       lastSubmittedForm.value = {
         ...form,
@@ -208,17 +232,54 @@ export const useAnalysisStore = defineStore("profile", () => {
     return submitAnalysis(lastSubmittedForm.value);
   }
 
+  async function loadSavedSkinProfile() {
+    const auth = useAuthStore();
+    if (!auth.isAuthenticated) {
+      savedSkinProfile.value = null;
+      return null;
+    }
+
+    const result = await getSkinProfile(auth.token);
+    savedSkinProfile.value = result.profile;
+    return mapBackendProfileToForm(result.profile);
+  }
+
+  async function saveSkinProfile(form) {
+    const auth = useAuthStore();
+    if (!auth.isAuthenticated) {
+      return null;
+    }
+
+    const normalized = normalizeAnalysisForm(form);
+    const result = await updateSkinProfile({
+      skin_type: normalized.questionnaire.skin_type,
+      skin_concerns: normalized.questionnaire.skin_concerns,
+      avoided_ingredients: normalized.questionnaire.avoided_ingredients,
+      default_product_category: normalized.questionnaire.product_category,
+      default_activity_type: normalized.questionnaire.activity_type || "indoor",
+    }, auth.token);
+
+    savedSkinProfile.value = result.profile;
+    return result.profile;
+  }
+
   return {
     userProfile,
     guestSession,
     location,
     weatherData,
     recommendations,
+    questionnaireId,
+    weatherInsights,
+    routineSummary,
+    savedSkinProfile,
     isLoading,
     error,
     hasResult,
     skinAlert,
     submitAnalysis,
     refreshAnalysis,
+    loadSavedSkinProfile,
+    saveSkinProfile,
   };
 });

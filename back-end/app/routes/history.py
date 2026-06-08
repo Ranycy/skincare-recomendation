@@ -1,11 +1,25 @@
 from flask import Blueprint, request, jsonify
 
-from app.controllers.history_controller import get_history
+from app.controllers.history_controller import delete_history_item, get_history, get_history_detail
 
 history_bp = Blueprint("history", __name__)
 
 
 @history_bp.route("/history", methods=["GET"])
 def history():
-    result, status = get_history(request.headers.get("Authorization", ""))
+    page = request.args.get("page", 1, type=int)
+    limit = request.args.get("limit", 10, type=int)
+    result, status = get_history(request.headers.get("Authorization", ""), page, limit)
+    return jsonify(result), status
+
+
+@history_bp.route("/history/<questionnaire_id>", methods=["GET"])
+def history_detail(questionnaire_id):
+    result, status = get_history_detail(request.headers.get("Authorization", ""), questionnaire_id)
+    return jsonify(result), status
+
+
+@history_bp.route("/history/<questionnaire_id>", methods=["DELETE"])
+def delete_history(questionnaire_id):
+    result, status = delete_history_item(request.headers.get("Authorization", ""), questionnaire_id)
     return jsonify(result), status

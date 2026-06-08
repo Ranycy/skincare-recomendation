@@ -26,11 +26,15 @@ def create_app():
     from app.routes.auth import auth_bp
     from app.routes.recommend import recommend_bp
     from app.routes.history import history_bp
+    from app.routes.profile import profile_bp
+    from app.routes.favorites import favorites_bp
 
     app.register_blueprint(home_bp)
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(recommend_bp, url_prefix="/api")
     app.register_blueprint(history_bp, url_prefix="/api")
+    app.register_blueprint(profile_bp, url_prefix="/api")
+    app.register_blueprint(favorites_bp, url_prefix="/api")
 
     with app.app_context():
         from app import models  # noqa: F401

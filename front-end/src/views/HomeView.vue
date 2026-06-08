@@ -5,13 +5,13 @@ import { ArrowRight, MapPin, Activity, ShieldCheck, Sparkles } from 'lucide-vue-
 const featureItems = [
   {
     icon: MapPin,
-    title: 'Cuaca real time',
-    description: 'Rekomendasi mengikuti lokasi, UV, kelembapan, dan kondisi harianmu.',
+    title: 'Weather real time',
+    description: 'Rekomendasi mengikuti lokasi, UV, Humidity, dan kondisi harianmu.',
   },
   {
     icon: Activity,
     title: 'Profil kulit personal',
-    description: 'Skin type, concern, kategori produk, dan kandungan yang dihindari ikut dihitung.',
+    description: 'Jenis kulit, concern kulit, kategori produk, dan kandungan yang dihindari ikut dihitung.',
   },
   {
     icon: ShieldCheck,
@@ -43,7 +43,7 @@ const featureItems = [
 
           <div class="flex flex-col gap-3 sm:flex-row">
             <RouterLink to="/profile" class="btn-primary min-h-12 px-6">
-              <span>Cek Rekomendasi</span>
+              <span>Cek rekomendasi</span>
               <ArrowRight class="h-4 w-4" />
             </RouterLink>
             <RouterLink to="/dashboard" class="btn-secondary min-h-12 px-6">

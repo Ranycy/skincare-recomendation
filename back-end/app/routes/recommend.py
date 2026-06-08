@@ -11,5 +11,5 @@ def recommend():
     if not data:
         return jsonify({"error": "Request body is required"}), 400
 
-    result, status = create_recommendation(data)
+    result, status = create_recommendation(data, request.headers.get("Authorization", ""))
     return jsonify(result), status
