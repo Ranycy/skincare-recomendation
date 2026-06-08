@@ -1,14 +1,27 @@
 <script setup>
 import { ref } from 'vue';
 import { RouterLink } from 'vue-router';
-import { Menu, X, Leaf, Sparkles } from 'lucide-vue-next';
+import { Menu, X, Leaf, Sparkles, LogOut } from 'lucide-vue-next';
+import { useAuthStore } from '../stores/useAuthStore';
+import { notifySuccess } from '../utils/notifications';
 
 const isMenuOpen = ref(false);
+const auth = useAuthStore();
 const navLinks = [
   { name: 'Home', path: '/' },
   { name: 'Analysis', path: '/profile' },
   { name: 'Dashboard', path: '/dashboard' },
 ];
+const authLinks = [
+  { name: 'History', path: '/history' },
+  { name: 'Saved', path: '/saved' },
+];
+
+function handleLogout() {
+  auth.logout();
+  isMenuOpen.value = false;
+  notifySuccess('Logout berhasil', 'Kamu tetap bisa memakai rekomendasi sebagai guest.');
+}
 </script>
 
 <template>
@@ -34,10 +47,29 @@ const navLinks = [
           >
             {{ link.name }}
           </RouterLink>
+          <template v-if="auth.isAuthenticated">
+            <RouterLink
+              v-for="link in authLinks"
+              :key="link.path"
+              :to="link.path"
+              class="text-sm font-semibold text-gray-500 transition-colors hover:text-primary"
+              active-class="text-primary"
+            >
+              {{ link.name }}
+            </RouterLink>
+          </template>
           <RouterLink to="/profile" class="btn-primary px-5 py-2.5">
             <Sparkles class="h-4 w-4" />
             <span>Get Started</span>
           </RouterLink>
+          <button v-if="auth.isAuthenticated" class="btn-secondary px-4 py-2.5" @click="handleLogout">
+            <LogOut class="h-4 w-4" />
+            <span>Logout</span>
+          </button>
+          <div v-else class="flex items-center gap-2">
+            <RouterLink to="/login" class="btn-secondary px-4 py-2.5">Login</RouterLink>
+            <RouterLink to="/signup" class="btn-s-light px-4 py-2.5">Sign up</RouterLink>
+          </div>
         </div>
 
         <button
@@ -64,10 +96,30 @@ const navLinks = [
           >
             {{ link.name }}
           </RouterLink>
+          <template v-if="auth.isAuthenticated">
+            <RouterLink
+              v-for="link in authLinks"
+              :key="link.path"
+              :to="link.path"
+              @click="isMenuOpen = false"
+              class="flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-bold text-gray-600"
+              active-class="bg-primary/10 text-primary"
+            >
+              {{ link.name }}
+            </RouterLink>
+          </template>
           <RouterLink to="/profile" @click="isMenuOpen = false" class="btn-primary mt-2 w-full">
             <Sparkles class="h-4 w-4" />
             <span>Start Analysis</span>
           </RouterLink>
+          <button v-if="auth.isAuthenticated" class="btn-secondary mt-2 w-full" @click="handleLogout">
+            <LogOut class="h-4 w-4" />
+            <span>Logout</span>
+          </button>
+          <div v-else class="grid grid-cols-2 gap-2 pt-2">
+            <RouterLink to="/login" @click="isMenuOpen = false" class="btn-secondary w-full">Login</RouterLink>
+            <RouterLink to="/signup" @click="isMenuOpen = false" class="btn-s-light w-full">Sign up</RouterLink>
+          </div>
         </div>
       </div>
     </transition>

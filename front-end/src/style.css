@@ -81,6 +81,18 @@ textarea {
   cursor: text;
 }
 
+summary {
+  list-style: none;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+details[open] .details-chevron {
+  transform: rotate(180deg);
+}
+
 h1,
 h2,
 h3,
@@ -145,6 +157,10 @@ h6 {
   .field-chip-active {
     @apply border-primary/30 bg-accent-pink/70 text-primary-dark ring-2 ring-primary/10;
   }
+
+  .auth-input {
+    @apply min-h-12 w-full rounded-2xl border border-primary/10 bg-white px-4 text-sm font-semibold text-gray-700 shadow-sm outline-none transition focus:border-primary/30 focus:ring-4 focus:ring-primary/10;
+  }
 }
 
 .fade-enter-active,
@@ -170,6 +186,63 @@ h6 {
 .page-transition-leave-to {
   opacity: 0;
   transform: translateY(-8px);
+}
+
+.accordion-enter-active,
+.accordion-leave-active {
+  max-height: 40rem;
+  overflow: hidden;
+  transition: max-height 0.32s ease, opacity 0.22s ease, transform 0.22s ease;
+}
+
+.accordion-enter-from,
+.accordion-leave-to {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+.accordion-enter-to,
+.accordion-leave-from {
+  max-height: 40rem;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.list-enter-active,
+.list-leave-active {
+  transition: opacity 0.26s ease, transform 0.26s ease;
+}
+
+.list-enter-from,
+.list-leave-to {
+  opacity: 0;
+  transform: translateY(10px) scale(0.98);
+}
+
+.list-move {
+  transition: transform 0.26s ease;
+}
+
+.modal-pop-enter-active,
+.modal-pop-leave-active {
+  transition: opacity 0.22s ease;
+}
+
+.modal-pop-enter-active > section,
+.modal-pop-leave-active > section {
+  transition: transform 0.24s ease, opacity 0.24s ease;
+}
+
+.modal-pop-enter-from,
+.modal-pop-leave-to {
+  opacity: 0;
+}
+
+.modal-pop-enter-from > section,
+.modal-pop-leave-to > section {
+  opacity: 0;
+  transform: translateY(18px) scale(0.98);
 }
 
 [data-sonner-toaster] {

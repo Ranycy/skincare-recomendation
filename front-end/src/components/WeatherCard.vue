@@ -5,14 +5,14 @@
         <div class="mb-2 flex items-start gap-2 text-primary-light">
           <MapPin class="h-4 w-4" />
           <div class="min-w-0">
-            <span class="block text-[10px] font-bold uppercase tracking-[0.16em] text-primary-light/75">Scanned location</span>
+            <span class="block text-[10px] font-bold uppercase tracking-[0.16em] text-primary-light/75">Lokasi terdeteksi</span>
             <span class="mt-0.5 block max-w-[13rem] truncate text-xs font-bold uppercase tracking-[0.12em] text-white">
               {{ weather.location }}
             </span>
           </div>
         </div>
         <h2 class="text-5xl font-display font-bold leading-none">{{ weather.temperature }}&deg;C</h2>
-        <p class="mt-2 text-sm font-semibold text-white/80">{{ weather.condition }} today</p>
+        <p class="mt-2 text-sm font-semibold text-white/80">{{ weather.condition }} hari ini</p>
       </div>
       <span class="rounded-2xl bg-white/15 px-3 py-2 text-xs font-bold text-white/90">
         Live
