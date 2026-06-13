@@ -8,6 +8,8 @@ from flask import current_app
 from app import db
 from app.models.user import User
 
+SUPPORTED_LOCALES = {"id", "en"}
+
 
 def generate_jwt(user_id: str) -> str:
     payload = {
@@ -43,7 +45,27 @@ def get_user_from_token(auth_header: str) -> tuple[User | None, str | None]:
     return user, None
 
 
-def register_user(email: str, password: str, name: str) -> tuple[dict, int]:
+def normalize_locale(value: str | None, fallback: str = "en") -> str:
+    locale = (value or "").strip().lower()
+    if locale in SUPPORTED_LOCALES:
+        return locale
+    return fallback if fallback in SUPPORTED_LOCALES else "en"
+
+
+def serialize_auth_user(user: User, token: str | None = None) -> dict:
+    data = {
+        "user_id": user.id,
+        "email": user.email,
+        "name": user.name,
+        "is_guest": user.is_guest,
+        "preferred_locale": normalize_locale(user.preferred_locale),
+    }
+    if token:
+        data["token"] = token
+    return data
+
+
+def register_user(email: str, password: str, name: str, preferred_locale: str | None = None) -> tuple[dict, int]:
     email = email.strip().lower()
     name = name.strip()
 
@@ -58,17 +80,18 @@ def register_user(email: str, password: str, name: str) -> tuple[dict, int]:
 
     password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
-    user = User(email=email, password_hash=password_hash, name=name or None, is_guest=False)
+    user = User(
+        email=email,
+        password_hash=password_hash,
+        name=name or None,
+        is_guest=False,
+        preferred_locale=normalize_locale(preferred_locale),
+    )
     db.session.add(user)
     db.session.commit()
 
     token = generate_jwt(user.id)
-    return {
-        "user_id": user.id,
-        "email": user.email,
-        "name": user.name,
-        "token": token,
-    }, 201
+    return serialize_auth_user(user, token), 201
 
 
 def login_user(email: str, password: str) -> tuple[dict, int]:
@@ -82,12 +105,7 @@ def login_user(email: str, password: str) -> tuple[dict, int]:
         return {"error": "Invalid email or password"}, 401
 
     token = generate_jwt(user.id)
-    return {
-        "user_id": user.id,
-        "email": user.email,
-        "name": user.name,
-        "token": token,
-    }, 200
+    return serialize_auth_user(user, token), 200
 
 
 def create_guest_session() -> tuple[dict, int]:
@@ -111,9 +129,4 @@ def get_current_user(auth_header: str) -> tuple[dict, int]:
         status = 404 if error == "User not found" else 401
         return {"error": error}, status
 
-    return {
-        "user_id": user.id,
-        "email": user.email,
-        "name": user.name,
-        "is_guest": user.is_guest,
-    }, 200
+    return serialize_auth_user(user), 200

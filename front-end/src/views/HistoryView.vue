@@ -1,21 +1,21 @@
 <template>
   <div class="page-container section-pad">
     <header class="mb-7 space-y-2">
-      <span class="badge">Riwayat rekomendasi</span>
-      <h1 class="text-4xl font-bold tracking-tight text-p-d sm:text-5xl">Riwayat rekomendasi</h1>
+      <span class="badge">{{ t('history.badge') }}</span>
+      <h1 class="text-4xl font-bold tracking-tight text-p-d sm:text-5xl">{{ t('history.title') }}</h1>
       <p class="max-w-2xl text-sm leading-6 text-gray-600">
-        Lihat kembali analisis sebelumnya, kondisi cuaca saat itu, dan produk yang paling cocok.
+        {{ t('history.description') }}
       </p>
     </header>
 
     <div v-if="isLoading" class="soft-card p-8 text-center text-sm font-semibold text-gray-500">
-      Memuat riwayat...
+      {{ t('history.loading') }}
     </div>
 
     <div v-else-if="history.length === 0" class="soft-card p-8 text-center">
-      <p class="font-bold text-p-d">Belum ada riwayat</p>
-      <p class="mt-2 text-sm leading-6 text-gray-500">Kirim analisis saat login agar hasilnya tersimpan di akun kamu.</p>
-      <RouterLink to="/profile" class="btn-primary mt-5">Mulai analisis</RouterLink>
+      <p class="font-bold text-p-d">{{ t('history.emptyTitle') }}</p>
+      <p class="mt-2 text-sm leading-6 text-gray-500">{{ t('history.emptyDescription') }}</p>
+      <RouterLink :to="locale.path('/profile')" class="btn-primary mt-5">{{ t('history.start') }}</RouterLink>
     </div>
 
     <TransitionGroup v-else name="list" tag="div" class="grid gap-4 lg:grid-cols-2">
@@ -25,16 +25,16 @@
             <p class="eyebrow">{{ formatDate(item.created_at) }}</p>
             <h2 class="mt-1 text-xl font-bold text-p-d">{{ displayCategory(item.product_category) }}</h2>
           </div>
-          <span class="badge">{{ item.weather?.humidity ?? '-' }}% Humidity</span>
+          <span class="badge">{{ item.weather?.humidity ?? '-' }}% {{ t('history.humidity') }}</span>
         </div>
 
         <div class="mb-4 grid grid-cols-2 gap-3 text-sm">
           <div class="rounded-2xl bg-primary/5 p-3">
-            <span class="text-xs font-bold uppercase tracking-[0.12em] text-primary/70">Jenis kulit</span>
-            <p class="mt-1 font-bold text-primary-dark">{{ displaySkinType(item.skin_type) }}</p>
+            <span class="text-xs font-bold uppercase tracking-[0.12em] text-primary/70">{{ t('history.skinType') }}</span>
+            <p class="mt-1 font-bold text-primary-dark">{{ displaySkinType(item.skin_type, locale.locale) }}</p>
           </div>
           <div class="rounded-2xl bg-accent-pink/50 p-3">
-            <span class="text-xs font-bold uppercase tracking-[0.12em] text-s-d/80">Weather</span>
+            <span class="text-xs font-bold uppercase tracking-[0.12em] text-s-d/80">{{ t('history.weather') }}</span>
             <p class="mt-1 font-bold text-s-d">{{ item.weather?.temperature ?? '-' }}&deg;C</p>
           </div>
         </div>
@@ -48,13 +48,13 @@
         <div class="mt-4 grid grid-cols-[1fr_auto] gap-2">
           <button class="btn-secondary min-h-11" @click="openDetail(item.questionnaire_id)">
             <Eye class="h-4 w-4" />
-            <span>Lihat detail</span>
+            <span>{{ t('common.viewDetails') }}</span>
           </button>
           <button
             class="grid min-h-11 w-12 place-items-center rounded-full border border-red-100 bg-red-50 text-red-600 transition hover:bg-red-100 disabled:opacity-50"
             :disabled="deletingId === item.questionnaire_id"
             @click="openDeleteDialog(item)"
-            aria-label="Hapus riwayat"
+            :aria-label="t('history.deleteAria')"
           >
             <LoaderCircle v-if="deletingId === item.questionnaire_id" class="h-4 w-4 animate-spin" />
             <Trash2 v-else class="h-4 w-4" />
@@ -77,12 +77,12 @@
         v-if="deleteTarget"
         class="fixed inset-0 z-[70] flex items-end justify-center bg-gray-950/45 p-4 backdrop-blur-sm sm:items-center"
       >
-        <button class="absolute inset-0 cursor-default" aria-label="Batal hapus riwayat" @click="closeDeleteDialog"></button>
+        <button class="absolute inset-0 cursor-default" :aria-label="t('history.cancelDeleteAria')" @click="closeDeleteDialog"></button>
 
         <section class="relative w-full max-w-md rounded-[2rem] bg-white p-5 shadow-2xl sm:p-6">
           <button
             class="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full bg-gray-50 text-gray-500 transition hover:bg-gray-100 hover:text-gray-900"
-            aria-label="Tutup dialog"
+            :aria-label="t('history.closeDialog')"
             @click="closeDeleteDialog"
           >
             <X class="h-4 w-4" />
@@ -93,10 +93,10 @@
               <Trash2 class="h-5 w-5" />
             </span>
             <div>
-              <p class="eyebrow text-red-600">Hapus riwayat</p>
-              <h2 class="mt-1 text-2xl font-bold leading-tight text-p-d">Hapus rekomendasi ini?</h2>
+              <p class="eyebrow text-red-600">{{ t('history.deleteBadge') }}</p>
+              <h2 class="mt-1 text-2xl font-bold leading-tight text-p-d">{{ t('history.deleteTitle') }}</h2>
               <p class="mt-2 text-sm leading-6 text-gray-600">
-                Riwayat analisis akan dihapus dari akun kamu. Produk yang sudah tersimpan tetap aman.
+                {{ t('history.deleteDescription') }}
               </p>
             </div>
           </div>
@@ -107,18 +107,18 @@
                 <p class="text-xs font-bold uppercase tracking-[0.14em] text-primary/70">
                   {{ formatDate(deleteTarget.created_at) }}
                 </p>
-                <h3 class="mt-1 text-lg font-bold text-primary-dark">{{ displayCategory(deleteTarget.product_category) }}</h3>
+                <h3 class="mt-1 text-lg font-bold text-primary-dark">{{ displayCategory(deleteTarget.product_category, locale.locale) }}</h3>
               </div>
-              <span class="badge bg-white/80">{{ deleteTarget.weather?.humidity ?? '-' }}% Humidity</span>
+              <span class="badge bg-white/80">{{ deleteTarget.weather?.humidity ?? '-' }}% {{ t('history.humidity') }}</span>
             </div>
             <p v-if="deleteTarget.top_recommendation" class="mt-3 text-sm font-semibold leading-6 text-gray-700">
-              Match utama: {{ deleteTarget.top_recommendation.brand }} {{ deleteTarget.top_recommendation.product_name }}
+              {{ t('history.mainMatch') }} {{ deleteTarget.top_recommendation.brand }} {{ deleteTarget.top_recommendation.product_name }}
             </p>
           </div>
 
           <div class="mt-5 grid grid-cols-2 gap-3">
             <button class="btn-secondary min-h-12" :disabled="Boolean(deletingId)" @click="closeDeleteDialog">
-              Batal
+              {{ t('common.cancel') }}
             </button>
             <button
               class="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-red-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-red-700 active:scale-[0.98] disabled:opacity-60"
@@ -127,7 +127,7 @@
             >
               <LoaderCircle v-if="deletingId" class="h-4 w-4 animate-spin" />
               <Trash2 v-else class="h-4 w-4" />
-              <span>{{ deletingId ? 'Menghapus...' : 'Hapus' }}</span>
+              <span>{{ deletingId ? t('common.deleting') : t('common.delete') }}</span>
             </button>
           </div>
         </section>
@@ -137,10 +137,12 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import { deleteHistory, getHistory, getHistoryDetail } from "../services/api";
 import { useAuthStore } from "../stores/useAuthStore";
 import { useFavoritesStore } from "../stores/useFavoritesStore";
+import { useLocaleStore } from "../stores/useLocaleStore";
 import ProductModal from "../components/ProductModal.vue";
 import { notifyError, notifySuccess } from "../utils/notifications";
 import { Eye, LoaderCircle, Trash2, X } from "lucide-vue-next";
@@ -148,6 +150,8 @@ import { displayCategory, displaySkinType } from "../utils/analysisMapping";
 
 const auth = useAuthStore();
 const favorites = useFavoritesStore();
+const locale = useLocaleStore();
+const { t } = useI18n();
 const history = ref([]);
 const isLoading = ref(false);
 const deletingId = ref("");
@@ -161,8 +165,8 @@ function normalizeHistoryProduct(product) {
     name: product.product_name,
     brand: product.brand,
     type: product.category,
-    displayType: displayCategory(product.category),
-    displaySkin: (product.skin_types || []).map((skin) => displaySkinType(skin)),
+    displayType: displayCategory(product.category, locale.locale),
+    displaySkin: (product.skin_types || []).map((skin) => displaySkinType(skin, locale.locale)),
     skin: product.skin_types || [],
     ingredients: product.active_ingredients || [],
     whyRecommended: product.why_recommended,
@@ -174,7 +178,7 @@ function normalizeHistoryProduct(product) {
 }
 
 function formatDate(value) {
-  return new Intl.DateTimeFormat("id-ID", {
+  return new Intl.DateTimeFormat(locale.locale === "id" ? "id-ID" : "en-US", {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -184,10 +188,10 @@ function formatDate(value) {
 async function loadHistory() {
   isLoading.value = true;
   try {
-    const result = await getHistory(auth.token, { page: 1, limit: 20 });
+    const result = await getHistory(auth.token, { page: 1, limit: 20, locale: locale.locale });
     history.value = result.history || [];
   } catch (error) {
-    notifyError("Riwayat gagal dimuat", error.message);
+    notifyError(t("history.loadFailedTitle"), error.message);
   } finally {
     isLoading.value = false;
   }
@@ -195,13 +199,13 @@ async function loadHistory() {
 
 async function openDetail(id) {
   try {
-    const result = await getHistoryDetail(id, auth.token);
+    const result = await getHistoryDetail(id, auth.token, locale.locale);
     const firstProduct = result.history_item?.recommendations?.[0];
     if (firstProduct) {
       selectedProduct.value = normalizeHistoryProduct(firstProduct);
     }
   } catch (error) {
-    notifyError("Detail gagal dimuat", error.message);
+    notifyError(t("history.detailFailedTitle"), error.message);
   }
 }
 
@@ -223,9 +227,9 @@ async function confirmDelete() {
     await deleteHistory(targetId, auth.token);
     history.value = history.value.filter((item) => item.questionnaire_id !== targetId);
     deleteTarget.value = null;
-    notifySuccess("Riwayat dihapus", "Riwayat rekomendasi berhasil dihapus.");
+    notifySuccess(t("history.deletedTitle"), t("history.deletedDescription"));
   } catch (error) {
-    notifyError("Gagal menghapus riwayat", error.message);
+    notifyError(t("history.deleteFailedTitle"), error.message);
   } finally {
     deletingId.value = "";
   }
@@ -235,13 +239,13 @@ async function handleToggleSave(product) {
   try {
     if (favorites.isSaved(product)) {
       await favorites.removeProduct(product);
-      notifySuccess("Produk dihapus", "Produk dihapus dari daftar tersimpan.");
+      notifySuccess(t("notifications.productRemovedTitle"), t("notifications.productRemovedDescription"));
     } else {
       await favorites.saveProduct(product);
-      notifySuccess("Produk tersimpan", "Produk bisa dilihat di halaman produk tersimpan.");
+      notifySuccess(t("notifications.productSavedTitle"), t("notifications.productSavedDescription"));
     }
   } catch (error) {
-    notifyError("Gagal menyimpan produk", error.message);
+    notifyError(t("notifications.productSaveFailedTitle"), error.message);
   }
 }
 
@@ -249,7 +253,15 @@ onMounted(async () => {
   try {
     await Promise.all([loadHistory(), favorites.loadFavorites()]);
   } catch (error) {
-    notifyError("Data gagal dimuat", error.message);
+    notifyError(t("history.dataFailedTitle"), error.message);
   }
 });
+
+watch(
+  () => locale.locale,
+  () => {
+    loadHistory();
+    selectedProduct.value = null;
+  },
+);
 </script>

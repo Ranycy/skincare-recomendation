@@ -20,6 +20,7 @@ def register():
         email=data.get("email", ""),
         password=data.get("password", ""),
         name=data.get("name", ""),
+        preferred_locale=data.get("preferred_locale"),
     )
     return jsonify(result), status
 

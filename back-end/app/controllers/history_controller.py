@@ -5,13 +5,20 @@ from app.models.questionnaire import QuestionnaireProfile
 from app.models.recommendation import Recommendation
 from app.services.guidance_service import (
     build_explanation_factors,
+    build_dynamic_why_recommended,
     build_routine_summary,
     build_weather_insights,
+    normalize_locale,
 )
 
 
-def rec_to_product(rec: Recommendation) -> dict:
-    return {
+def rec_to_product(
+    rec: Recommendation,
+    questionnaire: dict | None = None,
+    weather: dict | None = None,
+    locale: str = "en",
+) -> dict:
+    product = {
         "rank": rec.rank,
         "product_name": rec.product_name,
         "brand": rec.brand,
@@ -22,8 +29,18 @@ def rec_to_product(rec: Recommendation) -> dict:
         "score": rec.score,
     }
 
+    if questionnaire and weather:
+        product["why_recommended"] = build_dynamic_why_recommended(product, questionnaire, weather, locale)
 
-def profile_to_history_item(profile: QuestionnaireProfile, include_recommendations: bool = True) -> dict:
+    return product
+
+
+def profile_to_history_item(
+    profile: QuestionnaireProfile,
+    include_recommendations: bool = True,
+    locale: str = "en",
+) -> dict:
+    locale = normalize_locale(locale)
     recs = (
         Recommendation.query
         .filter_by(questionnaire_id=profile.id)
@@ -31,7 +48,7 @@ def profile_to_history_item(profile: QuestionnaireProfile, include_recommendatio
         .all()
     )
     weather = {
-        "location_name": "Lokasi saat ini",
+        "location_name": profile.location_name or "Lokasi saat ini",
         "temperature": recs[0].temp_c if recs else None,
         "humidity": recs[0].humidity if recs else None,
         "uv_index": recs[0].uv_index if recs else None,
@@ -44,11 +61,11 @@ def profile_to_history_item(profile: QuestionnaireProfile, include_recommendatio
         "activity_type": profile.activity_type,
         "avoided_ingredients": profile.avoided_ingredients,
     }
-    products = [rec_to_product(rec) for rec in recs]
+    products = [rec_to_product(rec, questionnaire, weather, locale) for rec in recs]
     recommendations = [
         {
             **product,
-            "explanation_factors": build_explanation_factors(product, questionnaire, weather),
+            "explanation_factors": build_explanation_factors(product, questionnaire, weather, locale),
         }
         for product in products
     ]
@@ -67,8 +84,8 @@ def profile_to_history_item(profile: QuestionnaireProfile, include_recommendatio
         },
         "created_at": profile.created_at.isoformat(),
         "weather": weather,
-        "weather_insights": build_weather_insights(weather, questionnaire),
-        "routine_summary": build_routine_summary(questionnaire, weather, products),
+        "weather_insights": build_weather_insights(weather, questionnaire, locale),
+        "routine_summary": build_routine_summary(questionnaire, weather, products, locale),
         "top_recommendation": recommendations[0] if recommendations else None,
     }
 
@@ -78,11 +95,12 @@ def profile_to_history_item(profile: QuestionnaireProfile, include_recommendatio
     return item
 
 
-def get_history(auth_header: str, page: int = 1, limit: int = 10) -> tuple[dict, int]:
+def get_history(auth_header: str, page: int = 1, limit: int = 10, locale: str | None = None) -> tuple[dict, int]:
     user, error = get_user_from_token(auth_header)
     if error:
         return {"error": error}, 401
 
+    resolved_locale = normalize_locale(locale, getattr(user, "preferred_locale", None))
     page = max(page, 1)
     limit = min(max(limit, 1), 50)
     query = QuestionnaireProfile.query.filter_by(user_id=user.id)
@@ -95,9 +113,13 @@ def get_history(auth_header: str, page: int = 1, limit: int = 10) -> tuple[dict,
         .all()
     )
 
-    history = [profile_to_history_item(profile, include_recommendations=False) for profile in profiles]
+    history = [
+        profile_to_history_item(profile, include_recommendations=False, locale=resolved_locale)
+        for profile in profiles
+    ]
 
     return {
+        "locale": resolved_locale,
         "history": history,
         "pagination": {
             "page": page,
@@ -108,7 +130,7 @@ def get_history(auth_header: str, page: int = 1, limit: int = 10) -> tuple[dict,
     }, 200
 
 
-def get_history_detail(auth_header: str, questionnaire_id: str) -> tuple[dict, int]:
+def get_history_detail(auth_header: str, questionnaire_id: str, locale: str | None = None) -> tuple[dict, int]:
     user, error = get_user_from_token(auth_header)
     if error:
         return {"error": error}, 401
@@ -117,7 +139,12 @@ def get_history_detail(auth_header: str, questionnaire_id: str) -> tuple[dict, i
     if not profile:
         return {"error": "History item not found"}, 404
 
-    return {"history_item": profile_to_history_item(profile)}, 200
+    resolved_locale = normalize_locale(locale, getattr(user, "preferred_locale", None))
+
+    return {
+        "locale": resolved_locale,
+        "history_item": profile_to_history_item(profile, locale=resolved_locale),
+    }, 200
 
 
 def delete_history_item(auth_header: str, questionnaire_id: str) -> tuple[dict, int]:

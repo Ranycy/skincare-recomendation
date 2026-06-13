@@ -7,7 +7,7 @@
         <button
           @click="$emit('close')"
           class="absolute right-4 top-4 z-10 grid h-10 w-10 place-items-center rounded-full bg-white/90 text-gray-500 shadow-sm backdrop-blur transition hover:text-gray-900"
-          aria-label="Tutup detail produk"
+          :aria-label="t('product.modalClose')"
         >
           <X class="h-5 w-5" />
         </button>
@@ -18,7 +18,7 @@
               <div class="absolute inset-0" :class="categoryWash"></div>
               <div class="relative flex h-full min-h-56 flex-col justify-between">
                 <div class="flex items-start justify-between gap-3">
-                  <span class="badge bg-white/80">{{ product.displayType || product.type }}</span>
+                  <span class="badge bg-white/80">{{ displayType }}</span>
                   <span class="rounded-full bg-primary-dark px-3 py-1 text-xs font-bold text-white">
                     #{{ product.rank }}
                   </span>
@@ -35,18 +35,18 @@
             <div class="space-y-6 p-5 sm:p-8">
               <div class="space-y-3 pr-10">
                 <div class="flex flex-wrap items-center gap-2">
-                  <span class="badge">{{ product.matchScore }}% match</span>
-                  <span class="badge bg-accent-pink/80 text-s-d">{{ product.displayType || product.type }}</span>
+                  <span class="badge">{{ t('product.match', { score: product.matchScore }) }}</span>
+                  <span class="badge bg-accent-pink/80 text-s-d">{{ displayType }}</span>
                 </div>
                 <h2 class="text-3xl font-bold leading-tight text-gray-950 sm:text-4xl">{{ product.name }}</h2>
                 <p class="text-sm leading-6 text-gray-600">
-                  Rekomendasi ini dibuat dari profil kulit, cuaca, dan preferensi kandungan yang kamu isi.
+                  {{ t('product.about') }}
                 </p>
               </div>
 
               <div class="grid gap-5 sm:grid-cols-2">
                 <section class="space-y-3">
-                  <h3 class="eyebrow">Ingredient utama</h3>
+                  <h3 class="eyebrow">{{ t('product.keyIngredients') }}</h3>
                   <div class="flex flex-wrap gap-2">
                     <span
                       v-for="ing in product.ingredients"
@@ -59,7 +59,7 @@
                 </section>
 
                 <section class="space-y-3">
-                  <h3 class="eyebrow">Jenis kulit</h3>
+                  <h3 class="eyebrow">{{ t('product.skinTypes') }}</h3>
                   <div class="flex flex-wrap gap-2">
                     <span
                       v-for="skin in displaySkins"
@@ -76,7 +76,7 @@
               <section class="rounded-3xl border border-primary/10 bg-primary/5 p-5">
                 <div class="mb-3 flex items-center gap-2 text-primary-dark">
                   <Info class="h-5 w-5" />
-                  <h3 class="font-bold">Kenapa produk ini?</h3>
+                  <h3 class="font-bold">{{ t('product.whyProduct') }}</h3>
                 </div>
                 <ul v-if="summaryPoints.length" class="mb-4 grid gap-2">
                   <li
@@ -94,18 +94,18 @@
 
               <section v-if="product.explanationFactors" class="grid gap-3 rounded-3xl border border-primary/10 bg-white p-5 text-sm sm:grid-cols-2">
                 <div>
-                  <p class="eyebrow">Faktor Weather</p>
+                  <p class="eyebrow">{{ t('product.weatherFactor') }}</p>
                   <p class="mt-1 font-semibold text-gray-700">{{ product.explanationFactors.weather_reason }}</p>
                 </div>
                 <div>
-                  <p class="eyebrow">Kandungan dihindari</p>
+                  <p class="eyebrow">{{ t('product.avoidedIngredients') }}</p>
                   <p class="mt-1 font-semibold text-gray-700">{{ product.explanationFactors.avoidance_note }}</p>
                 </div>
               </section>
 
               <button class="btn-s-light w-full" @click="$emit('toggle-save', product)">
                 <Heart class="h-4 w-4" :class="{ 'fill-current': isSaved }" />
-                <span>{{ isSaved ? 'Tersimpan' : 'Simpan produk' }}</span>
+                <span>{{ isSaved ? t('product.savedProduct') : t('product.saveProduct') }}</span>
               </button>
             </div>
           </div>
@@ -117,7 +117,13 @@
 
 <script setup>
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 import { X, CheckCircle2, Info, Heart } from "lucide-vue-next";
+import { useLocaleStore } from "../stores/useLocaleStore";
+import { displayCategory, displaySkinType } from "../utils/analysisMapping";
+
+const { t } = useI18n();
+const locale = useLocaleStore();
 
 const props = defineProps({
   product: Object,
@@ -126,7 +132,8 @@ const props = defineProps({
 });
 
 const summaryPoints = computed(() => props.product?.summaryPoints || props.product?.explanationFactors?.summary_points || []);
-const displaySkins = computed(() => props.product?.displaySkin || props.product?.skin || []);
+const displayType = computed(() => displayCategory(props.product?.type || props.product?.displayType, locale.locale));
+const displaySkins = computed(() => (props.product?.skin || props.product?.displaySkin || []).map((skin) => displaySkinType(skin, locale.locale)));
 
 const categoryWash = computed(() => {
   const type = props.product?.type || "";

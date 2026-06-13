@@ -11,6 +11,7 @@ class User(db.Model):
     password_hash = db.Column(db.String(255), nullable=True)
     name = db.Column(db.String(100), nullable=True)
     is_guest = db.Column(db.Boolean, nullable=False, default=True)
+    preferred_locale = db.Column(db.String(10), nullable=False, default="en")
     session_token = db.Column(db.String(255), unique=True, nullable=True)
     session_expires_at = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))

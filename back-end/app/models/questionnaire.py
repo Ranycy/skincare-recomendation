@@ -16,6 +16,7 @@ class QuestionnaireProfile(db.Model):
     lat = db.Column(db.Float, nullable=False)
     lon = db.Column(db.Float, nullable=False)
     location_method = db.Column(db.String(20), nullable=True)
+    location_name = db.Column(db.String(120), nullable=True)
     created_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
 
     recommendations = db.relationship("Recommendation", backref="questionnaire", lazy=True)

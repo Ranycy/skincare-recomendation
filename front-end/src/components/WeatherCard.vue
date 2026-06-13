@@ -5,24 +5,24 @@
         <div class="mb-2 flex items-start gap-2 text-primary-light">
           <MapPin class="h-4 w-4" />
           <div class="min-w-0">
-            <span class="block text-[10px] font-bold uppercase tracking-[0.16em] text-primary-light/75">Lokasi terdeteksi</span>
+            <span class="block text-[10px] font-bold uppercase tracking-[0.16em] text-primary-light/75">{{ t('weather.locationDetected') }}</span>
             <span class="mt-0.5 block max-w-[13rem] truncate text-xs font-bold uppercase tracking-[0.12em] text-white">
               {{ weather.location }}
             </span>
           </div>
         </div>
         <h2 class="text-5xl font-display font-bold leading-none">{{ weather.temperature }}&deg;C</h2>
-        <p class="mt-2 text-sm font-semibold text-white/80">{{ weather.condition }} hari ini</p>
+        <p class="mt-2 text-sm font-semibold text-white/80">{{ t('weather.conditionToday', { condition: weather.condition }) }}</p>
       </div>
       <span class="rounded-2xl bg-white/15 px-3 py-2 text-xs font-bold text-white/90">
-        Live
+        {{ t('common.live') }}
       </span>
     </div>
 
     <div class="grid grid-cols-3 gap-2">
       <div class="rounded-2xl bg-white/12 p-3">
         <Droplets class="mb-2 h-4 w-4 text-primary-light" />
-        <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/60">Humidity</p>
+        <p class="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/60">{{ t('weather.humidity') }}</p>
         <p class="mt-1 text-sm font-bold">{{ weather.humidity }}%</p>
       </div>
       <div class="rounded-2xl bg-white/12 p-3">
@@ -48,6 +48,9 @@
 
 <script setup>
 import { MapPin, Droplets, Sun, Wind, ShieldAlert } from "lucide-vue-next";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 defineProps({
   weather: Object,

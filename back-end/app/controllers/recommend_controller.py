@@ -8,6 +8,7 @@ from app.services.guidance_service import (
     build_dynamic_why_recommended,
     build_routine_summary,
     build_weather_insights,
+    normalize_locale,
 )
 from app.services.weather_service import fetch_weather
 from datetime import datetime, timezone
@@ -39,6 +40,7 @@ def is_expired(expires_at) -> bool:
 def create_recommendation(data: dict, auth_header: str = "") -> tuple[dict, int]:
     questionnaire = data.get("questionnaire", {})
     location = data.get("location", {})
+    requested_locale = data.get("locale")
     user_id = data.get("user_id")
     session_token = data.get("session_token")
 
@@ -68,16 +70,16 @@ def create_recommendation(data: dict, auth_header: str = "") -> tuple[dict, int]
             return {"error": auth_error}, 401
         user_id = user.id
         is_guest = False
-    elif session_token:
-        user = User.query.filter_by(session_token=session_token).first()
+    else:
+        if not user_id or not session_token:
+            return {"error": "Guest session is required"}, 401
+
+        user = User.query.filter_by(id=user_id, session_token=session_token, is_guest=True).first()
         if not user or is_expired(user.session_expires_at):
             return {"error": "Invalid or expired guest session"}, 401
-        user_id = user.id
         is_guest = True
-    elif user_id:
-        user = User.query.get(user_id)
-        if user:
-            is_guest = user.is_guest
+
+    locale = normalize_locale(requested_locale, getattr(user, "preferred_locale", None))
 
     try:
         weather_data = fetch_weather(lat, lon)
@@ -95,8 +97,8 @@ def create_recommendation(data: dict, auth_header: str = "") -> tuple[dict, int]
         activity=activity,
         avoid_ingredients=avoided_ingredients,
     )
-    weather_insights = build_weather_insights(weather_data, questionnaire)
-    routine_summary = build_routine_summary(questionnaire, weather_data, results)
+    weather_insights = build_weather_insights(weather_data, questionnaire, locale)
+    routine_summary = build_routine_summary(questionnaire, weather_data, results, locale)
 
     profile = QuestionnaireProfile(
         user_id=user_id,
@@ -108,12 +110,13 @@ def create_recommendation(data: dict, auth_header: str = "") -> tuple[dict, int]
         lat=lat,
         lon=lon,
         location_method=location_method,
+        location_name=weather_data.get("location_name"),
     )
     db.session.add(profile)
     db.session.flush()
 
     for rank, product in enumerate(results, start=1):
-        dynamic_why = build_dynamic_why_recommended(product, questionnaire, weather_data)
+        dynamic_why = build_dynamic_why_recommended(product, questionnaire, weather_data, locale)
         rec = Recommendation(
             questionnaire_id=profile.id,
             product_name=product["product_name"],
@@ -135,6 +138,7 @@ def create_recommendation(data: dict, auth_header: str = "") -> tuple[dict, int]
     db.session.commit()
 
     return {
+        "locale": locale,
         "questionnaire_id": profile.id,
         "weather": {
             "location_name": weather_data.get("location_name", "Lokasi saat ini"),
@@ -151,8 +155,8 @@ def create_recommendation(data: dict, auth_header: str = "") -> tuple[dict, int]
                 "category": p["category"],
                 "skin_types": p["skin_types"],
                 "active_ingredients": p["active_ingredients"],
-                "why_recommended": build_dynamic_why_recommended(p, questionnaire, weather_data),
-                "explanation_factors": build_explanation_factors(p, questionnaire, weather_data),
+                "why_recommended": build_dynamic_why_recommended(p, questionnaire, weather_data, locale),
+                "explanation_factors": build_explanation_factors(p, questionnaire, weather_data, locale),
                 "score": p["score"],
             }
             for i, p in enumerate(results)

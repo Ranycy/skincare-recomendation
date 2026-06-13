@@ -1,24 +1,29 @@
 <script setup>
 import { RouterLink } from 'vue-router';
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { ArrowRight, MapPin, Activity, ShieldCheck, Sparkles } from 'lucide-vue-next';
+import { useLocaleStore } from '../stores/useLocaleStore';
 
-const featureItems = [
+const { t } = useI18n();
+const locale = useLocaleStore();
+const featureItems = computed(() => [
   {
     icon: MapPin,
-    title: 'Weather real time',
-    description: 'Rekomendasi mengikuti lokasi, UV, Humidity, dan kondisi harianmu.',
+    title: t('home.features.weather.title'),
+    description: t('home.features.weather.description'),
   },
   {
     icon: Activity,
-    title: 'Profil kulit personal',
-    description: 'Jenis kulit, concern kulit, kategori produk, dan kandungan yang dihindari ikut dihitung.',
+    title: t('home.features.profile.title'),
+    description: t('home.features.profile.description'),
   },
   {
     icon: ShieldCheck,
-    title: 'Lebih terarah',
-    description: 'Hasilnya menjelaskan alasan produk dipilih, bukan sekadar daftar populer.',
+    title: t('home.features.explanation.title'),
+    description: t('home.features.explanation.description'),
   },
-];
+]);
 </script>
 
 <template>
@@ -28,26 +33,26 @@ const featureItems = [
         <div class="space-y-7">
           <div class="badge w-fit">
             <Sparkles class="h-3.5 w-3.5" />
-            <span>AI skincare companion</span>
+            <span>{{ t('home.badge') }}</span>
           </div>
 
           <div class="space-y-5">
             <h1 class="max-w-3xl text-5xl font-bold leading-[0.98] tracking-tight text-p-d sm:text-6xl lg:text-7xl">
-              Stop guessing.
-              <span class="block italic text-s-d decoration-accent-pink decoration-8 underline underline-offset-[-0.12em]">Start understanding your skin.</span>
+              {{ t('home.titleStart') }}
+              <span class="block italic text-s-d decoration-accent-pink decoration-8 underline underline-offset-[-0.12em]">{{ t('home.titleEmphasis') }}</span>
             </h1>
             <p class="max-w-2xl text-base leading-7 text-gray-600 sm:text-lg">
-              SkinSense AI menggabungkan profil kulit dan cuaca real time untuk memberi rekomendasi skincare yang terasa personal, praktis, dan siap dipakai hari ini.
+              {{ t('home.description') }}
             </p>
           </div>
 
           <div class="flex flex-col gap-3 sm:flex-row">
-            <RouterLink to="/profile" class="btn-primary min-h-12 px-6">
-              <span>Cek rekomendasi</span>
+            <RouterLink :to="locale.path('/profile')" class="btn-primary min-h-12 px-6">
+              <span>{{ t('home.primaryCta') }}</span>
               <ArrowRight class="h-4 w-4" />
             </RouterLink>
-            <RouterLink to="/dashboard" class="btn-secondary min-h-12 px-6">
-              <span>Lihat Dashboard</span>
+            <RouterLink :to="locale.path('/dashboard')" class="btn-secondary min-h-12 px-6">
+              <span>{{ t('home.secondaryCta') }}</span>
             </RouterLink>
           </div>
         </div>

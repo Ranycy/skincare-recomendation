@@ -4,9 +4,30 @@ from flask import Flask
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from sqlalchemy import inspect, text
 
 db = SQLAlchemy()
 migrate = Migrate()
+
+
+def ensure_lightweight_schema_updates(app):
+    """Apply tiny SQLite-safe schema updates for local capstone development."""
+    if not app.config["SQLALCHEMY_DATABASE_URI"].startswith("sqlite"):
+        return
+
+    inspector = inspect(db.engine)
+    if inspector.has_table("users"):
+        user_columns = {column["name"] for column in inspector.get_columns("users")}
+        if "preferred_locale" not in user_columns:
+            db.session.execute(text("ALTER TABLE users ADD COLUMN preferred_locale VARCHAR(10) DEFAULT 'en'"))
+            db.session.execute(text("UPDATE users SET preferred_locale = 'en' WHERE preferred_locale IS NULL"))
+            db.session.commit()
+
+    if inspector.has_table("questionnaire_profiles"):
+        columns = {column["name"] for column in inspector.get_columns("questionnaire_profiles")}
+        if "location_name" not in columns:
+            db.session.execute(text("ALTER TABLE questionnaire_profiles ADD COLUMN location_name VARCHAR(120)"))
+            db.session.commit()
 
 
 def create_app():
@@ -39,5 +60,6 @@ def create_app():
     with app.app_context():
         from app import models  # noqa: F401
         db.create_all()
+        ensure_lightweight_schema_updates(app)
 
     return app

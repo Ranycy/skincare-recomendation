@@ -1,30 +1,25 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+import { translate } from "../i18n/index.js";
+import { getStoredLocale, normalizeLocale } from "../utils/locale.js";
 
-const API_ERROR_MESSAGES = {
-  "Email and password are required": "Email dan password wajib diisi.",
-  "Name, email, and password are required": "Nama, email, dan password wajib diisi.",
-  "Password must be at least 6 characters": "Password minimal 6 karakter.",
-  "Email already registered": "Email sudah terdaftar.",
-  "Invalid email or password": "Email atau password tidak valid.",
-  "Authorization header required": "Sesi login tidak ditemukan. Silakan login ulang.",
-  "Invalid or expired token": "Sesi login sudah kedaluwarsa. Silakan login ulang.",
-  "User not found": "Akun tidak ditemukan.",
-  "Request body is required": "Data request wajib diisi.",
-  "Invalid or expired guest session": "Sesi guest sudah kedaluwarsa. Coba ulangi analisis.",
-  "History item not found": "Riwayat rekomendasi tidak ditemukan.",
-  "Favorite product not found": "Produk tersimpan tidak ditemukan.",
-  "product_name is required": "Nama produk wajib diisi.",
-};
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 function translateApiError(message) {
   if (!message) return "";
-  if (API_ERROR_MESSAGES[message]) return API_ERROR_MESSAGES[message];
-  if (message.startsWith("Invalid product_category")) return "Kategori produk tidak valid.";
-  if (message.startsWith("Invalid default_product_category")) return "Kategori produk utama tidak valid.";
-  if (message.startsWith("Invalid skin_type")) return "Jenis kulit tidak valid.";
-  if (message.startsWith("Missing required fields")) return "Data rekomendasi belum lengkap.";
-  if (message.startsWith("Location lat and lon are required")) return "Lokasi GPS belum lengkap.";
+  const directKey = `apiErrors.${message}`;
+  const translated = translate(directKey);
+  if (translated !== directKey) return translated;
+  if (message.startsWith("Invalid product_category")) return translate("apiErrors.invalidCategory");
+  if (message.startsWith("Invalid default_product_category")) return translate("apiErrors.invalidDefaultCategory");
+  if (message.startsWith("Invalid skin_type")) return translate("apiErrors.invalidSkinType");
+  if (message.startsWith("Missing required fields")) return translate("apiErrors.missingFields");
+  if (message.startsWith("Location lat and lon are required")) return translate("apiErrors.locationRequired");
+  if (message.startsWith("Location (lat, lon) is required")) return translate("apiErrors.locationRequired");
   return message;
+}
+
+function withLocaleQuery(path, locale = getStoredLocale()) {
+  const separator = path.includes("?") ? "&" : "?";
+  return `${path}${separator}locale=${encodeURIComponent(normalizeLocale(locale))}`;
 }
 
 async function request(path, options = {}) {
@@ -41,14 +36,14 @@ async function request(path, options = {}) {
       ...fetchOptions,
     });
   } catch (error) {
-    throw new Error("Gagal terhubung ke server rekomendasi. Pastikan backend sedang berjalan.");
+    throw new Error(translate("apiErrors.connectFailed"));
   }
 
   const contentType = response.headers.get("content-type") || "";
   const data = contentType.includes("application/json") ? await response.json() : null;
 
   if (!response.ok) {
-    throw new Error(translateApiError(data?.error) || "Terjadi kesalahan saat memproses request.");
+    throw new Error(translateApiError(data?.error) || translate("apiErrors.generic"));
   }
 
   return data;
@@ -111,15 +106,30 @@ export function updateSkinProfile(payload, token) {
   });
 }
 
-export function getHistory(token, { page = 1, limit = 10 } = {}) {
-  return request(`/api/history?page=${page}&limit=${limit}`, {
+export function getPreferences(token) {
+  return request("/api/profile/preferences", {
     method: "GET",
     authToken: token,
   });
 }
 
-export function getHistoryDetail(id, token) {
-  return request(`/api/history/${id}`, {
+export function updatePreferences(payload, token) {
+  return request("/api/profile/preferences", {
+    method: "PUT",
+    authToken: token,
+    body: JSON.stringify(payload),
+  });
+}
+
+export function getHistory(token, { page = 1, limit = 10, locale = getStoredLocale() } = {}) {
+  return request(withLocaleQuery(`/api/history?page=${page}&limit=${limit}`, locale), {
+    method: "GET",
+    authToken: token,
+  });
+}
+
+export function getHistoryDetail(id, token, locale = getStoredLocale()) {
+  return request(withLocaleQuery(`/api/history/${id}`, locale), {
     method: "GET",
     authToken: token,
   });
