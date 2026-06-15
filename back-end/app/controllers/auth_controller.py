@@ -5,8 +5,8 @@ import bcrypt
 import jwt
 from flask import current_app
 
-from app import db
 from app.models.user import User
+from app.repositories.auth_repository import AuthRepository
 
 SUPPORTED_LOCALES = {"id", "en"}
 
@@ -27,9 +27,6 @@ def decode_jwt(token: str) -> dict | None:
 
 
 def get_user_from_token(auth_header: str) -> tuple[User | None, str | None]:
-    """Extract and validate JWT from Authorization header.
-    Returns (user, None) on success or (None, error_message) on failure.
-    """
     if not auth_header.startswith("Bearer "):
         return None, "Authorization header required"
 
@@ -38,7 +35,7 @@ def get_user_from_token(auth_header: str) -> tuple[User | None, str | None]:
     if not payload:
         return None, "Invalid or expired token"
 
-    user = User.query.get(payload["user_id"])
+    user = AuthRepository.find_by_id(payload["user_id"])
     if not user:
         return None, "User not found"
 
@@ -75,7 +72,7 @@ def register_user(email: str, password: str, name: str, preferred_locale: str | 
     if len(password) < 6:
         return {"error": "Password must be at least 6 characters"}, 400
 
-    if User.query.filter_by(email=email).first():
+    if AuthRepository.find_by_email(email):
         return {"error": "Email already registered"}, 409
 
     password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
@@ -87,8 +84,7 @@ def register_user(email: str, password: str, name: str, preferred_locale: str | 
         is_guest=False,
         preferred_locale=normalize_locale(preferred_locale),
     )
-    db.session.add(user)
-    db.session.commit()
+    AuthRepository.create(user)
 
     token = generate_jwt(user.id)
     return serialize_auth_user(user, token), 201
@@ -100,7 +96,7 @@ def login_user(email: str, password: str) -> tuple[dict, int]:
     if not email or not password:
         return {"error": "Email and password are required"}, 400
 
-    user = User.query.filter_by(email=email, is_guest=False).first()
+    user = AuthRepository.find_registered_by_email(email)
     if not user or not bcrypt.checkpw(password.encode("utf-8"), user.password_hash.encode("utf-8")):
         return {"error": "Invalid email or password"}, 401
 
@@ -113,8 +109,7 @@ def create_guest_session() -> tuple[dict, int]:
     expires_at = datetime.now(timezone.utc) + timedelta(hours=current_app.config["GUEST_SESSION_HOURS"])
 
     user = User(is_guest=True, session_token=session_token, session_expires_at=expires_at)
-    db.session.add(user)
-    db.session.commit()
+    AuthRepository.create(user)
 
     return {
         "user_id": user.id,

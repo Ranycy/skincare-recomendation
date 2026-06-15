@@ -1,6 +1,7 @@
-from app import db
 from app.controllers.auth_controller import SUPPORTED_LOCALES, get_user_from_token, normalize_locale
 from app.models.skin_profile import SkinProfile
+from app.repositories.auth_repository import AuthRepository
+from app.repositories.skin_profile_repository import SkinProfileRepository
 
 VALID_CATEGORIES = {"moisturizer", "cleanser", "face mask", "eye cream", "sunscreen"}
 VALID_SKIN_TYPES = {"normal", "dry", "oily", "combination", "sensitive"}
@@ -28,7 +29,7 @@ def get_skin_profile(auth_header: str) -> tuple[dict, int]:
     if error:
         return {"error": error}, 401
 
-    profile = SkinProfile.query.filter_by(user_id=user.id).first()
+    profile = SkinProfileRepository.find_by_user(user.id)
     return {"profile": serialize_skin_profile(profile)}, 200
 
 
@@ -52,10 +53,10 @@ def upsert_skin_profile(auth_header: str, data: dict) -> tuple[dict, int]:
     if activity_type not in VALID_ACTIVITIES:
         return {"error": "Invalid default_activity_type. Must be indoor or outdoor"}, 400
 
-    profile = SkinProfile.query.filter_by(user_id=user.id).first()
+    profile = SkinProfileRepository.find_by_user(user.id)
     if not profile:
         profile = SkinProfile(user_id=user.id, skin_type=skin_type)
-        db.session.add(profile)
+        SkinProfileRepository.create(profile)
 
     profile.skin_type = skin_type
     profile.skin_concerns = skin_concerns
@@ -63,7 +64,7 @@ def upsert_skin_profile(auth_header: str, data: dict) -> tuple[dict, int]:
     profile.default_product_category = product_category
     profile.default_activity_type = activity_type or None
 
-    db.session.commit()
+    SkinProfileRepository.commit()
     return {"profile": serialize_skin_profile(profile)}, 200
 
 
@@ -88,8 +89,7 @@ def update_preferences(auth_header: str, data: dict) -> tuple[dict, int]:
     if preferred_locale not in SUPPORTED_LOCALES:
         return {"error": "Unsupported locale"}, 400
 
-    user.preferred_locale = preferred_locale
-    db.session.commit()
+    AuthRepository.update_locale(user, preferred_locale)
 
     return {
         "preferences": {

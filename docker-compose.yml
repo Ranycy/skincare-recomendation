@@ -1,0 +1,30 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: B1823naa
+      POSTGRES_DB: skinsense
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  skinsense-api:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
+      - DATABASE_URL=postgresql://postgres:B1823naa@db:5432/skinsense
+      - WEATHERAPI_KEY=${WEATHERAPI_KEY}
+      - ML_MODEL_PATH=/app/machine-learning
+      - JWT_EXPIRATION_HOURS=24
+      - GUEST_SESSION_HOURS=24
+    depends_on:
+      - db
+    restart: unless-stopped
+
+volumes:
+  pgdata:

@@ -1,0 +1,12 @@
+__pycache__
+*.pyc
+*.db
+.env
+.git
+.claude
+front-end
+instance
+venv
+*.egg-info
+.pytest_cache
+node_modules
