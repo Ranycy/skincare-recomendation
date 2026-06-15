@@ -3,7 +3,7 @@ services:
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: B1823naa
+      POSTGRES_PASSWORD: Skinsense2026!
       POSTGRES_DB: skinsense
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -17,7 +17,7 @@ services:
       - "5000:5000"
     environment:
       - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
-      - DATABASE_URL=postgresql://postgres:B1823naa@db:5432/skinsense
+      - DATABASE_URL=postgresql://postgres:Skinsense2026!@db:5432/skinsense
       - WEATHERAPI_KEY=${WEATHERAPI_KEY}
       - ML_MODEL_PATH=/app/machine-learning
       - JWT_EXPIRATION_HOURS=24
