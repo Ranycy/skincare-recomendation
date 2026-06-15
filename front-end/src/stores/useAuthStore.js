@@ -1,6 +1,9 @@
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 import { getCurrentUser, loginUser, registerUser } from "../services/api";
+import { useAnalysisStore } from "./useAnalysisStore";
+import { useFavoritesStore } from "./useFavoritesStore";
+import { normalizeLocale } from "../utils/locale.js";
 
 const AUTH_TOKEN_KEY = "skinsense_auth_token";
 
@@ -19,6 +22,7 @@ export const useAuthStore = defineStore("auth", () => {
       email: authData.email,
       name: authData.name,
       is_guest: false,
+      preferred_locale: normalizeLocale(authData.preferred_locale),
     };
     localStorage.setItem(AUTH_TOKEN_KEY, authData.token);
   }
@@ -63,6 +67,7 @@ export const useAuthStore = defineStore("auth", () => {
     isLoading.value = true;
     try {
       user.value = await getCurrentUser(token.value);
+      user.value.preferred_locale = normalizeLocale(user.value.preferred_locale);
       return user.value;
     } catch (hydrateError) {
       logout();
@@ -77,6 +82,13 @@ export const useAuthStore = defineStore("auth", () => {
     user.value = null;
     error.value = "";
     localStorage.removeItem(AUTH_TOKEN_KEY);
+    useFavoritesStore().clearFavorites();
+    useAnalysisStore().clearAnalysisResult();
+  }
+
+  function setPreferredLocale(locale) {
+    if (!user.value) return;
+    user.value.preferred_locale = normalizeLocale(locale);
   }
 
   return {
@@ -89,5 +101,6 @@ export const useAuthStore = defineStore("auth", () => {
     signup,
     hydrate,
     logout,
+    setPreferredLocale,
   };
 });

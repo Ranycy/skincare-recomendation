@@ -1,5 +1,5 @@
 from app import db
-from app.controllers.auth_controller import get_user_from_token
+from app.controllers.auth_controller import SUPPORTED_LOCALES, get_user_from_token, normalize_locale
 from app.models.skin_profile import SkinProfile
 
 VALID_CATEGORIES = {"moisturizer", "cleanser", "face mask", "eye cream", "sunscreen"}
@@ -65,3 +65,34 @@ def upsert_skin_profile(auth_header: str, data: dict) -> tuple[dict, int]:
 
     db.session.commit()
     return {"profile": serialize_skin_profile(profile)}, 200
+
+
+def get_preferences(auth_header: str) -> tuple[dict, int]:
+    user, error = get_user_from_token(auth_header)
+    if error:
+        return {"error": error}, 401
+
+    return {
+        "preferences": {
+            "preferred_locale": normalize_locale(user.preferred_locale),
+        },
+    }, 200
+
+
+def update_preferences(auth_header: str, data: dict) -> tuple[dict, int]:
+    user, error = get_user_from_token(auth_header)
+    if error:
+        return {"error": error}, 401
+
+    preferred_locale = (data.get("preferred_locale") or "").strip().lower()
+    if preferred_locale not in SUPPORTED_LOCALES:
+        return {"error": "Unsupported locale"}, 400
+
+    user.preferred_locale = preferred_locale
+    db.session.commit()
+
+    return {
+        "preferences": {
+            "preferred_locale": user.preferred_locale,
+        },
+    }, 200

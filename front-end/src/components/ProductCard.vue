@@ -4,12 +4,12 @@
       <div class="absolute inset-0 opacity-70" :class="categoryWash"></div>
       <div class="relative flex h-full min-h-36 flex-col justify-between">
         <div class="flex items-start justify-between gap-3">
-          <span class="badge bg-white/80">{{ product.displayType || product.type }}</span>
+          <span class="badge bg-white/80">{{ displayType }}</span>
           <div class="flex items-center gap-2">
             <button
               class="grid h-8 w-8 place-items-center rounded-full bg-white/85 text-primary-dark shadow-sm transition hover:bg-accent-pink"
               @click.stop="$emit('toggle-save', product)"
-              aria-label="Simpan produk"
+              :aria-label="t('product.saveAria')"
             >
               <Heart class="h-4 w-4" :class="{ 'fill-primary text-primary': isSaved }" />
             </button>
@@ -54,7 +54,7 @@
       </div>
 
       <div class="mt-auto space-y-2 rounded-2xl bg-primary/5 p-3">
-        <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-primary/70">Kenapa cocok</p>
+        <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-primary/70">{{ t('product.whySuitable') }}</p>
         <ul class="space-y-1.5">
           <li
             v-for="point in visibleReasons"
@@ -71,7 +71,13 @@
 
 <script setup>
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 import { ArrowRight, Heart } from "lucide-vue-next";
+import { useLocaleStore } from "../stores/useLocaleStore";
+import { displayCategory } from "../utils/analysisMapping";
+
+const { t } = useI18n();
+const locale = useLocaleStore();
 
 const props = defineProps({
   product: Object,
@@ -79,10 +85,11 @@ const props = defineProps({
 });
 
 const visibleIngredients = computed(() => (props.product?.ingredients || []).slice(0, 4));
+const displayType = computed(() => displayCategory(props.product?.type || props.product?.displayType, locale.locale));
 const visibleReasons = computed(() => {
   const points = props.product?.summaryPoints || props.product?.explanationFactors?.summary_points || [];
   if (points.length > 0) return points.slice(0, 2);
-  return [props.product?.whyRecommended || "Rekomendasi ini disesuaikan dengan profil dan cuaca saat ini."];
+  return [props.product?.whyRecommended || t("product.fallbackWhy")];
 });
 
 const categoryWash = computed(() => {

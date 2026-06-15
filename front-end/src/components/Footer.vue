@@ -10,19 +10,19 @@
             <span class="text-xl font-display font-bold tracking-tight">SkinSense AI</span>
           </div>
           <p class="max-w-sm text-sm leading-relaxed text-primary-light/85">
-            Smart skincare guidance shaped by your skin profile and daily environment.
+            {{ t('footer.description') }}
           </p>
         </div>
 
         <div class="flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold text-primary-light/85">
-          <a href="#" class="transition-colors hover:text-white">Privacy</a>
-          <a href="#" class="transition-colors hover:text-white">Terms</a>
-          <a href="#" class="transition-colors hover:text-white">Contact</a>
+          <a href="#" class="transition-colors hover:text-white">{{ t('footer.privacy') }}</a>
+          <a href="#" class="transition-colors hover:text-white">{{ t('footer.terms') }}</a>
+          <a href="#" class="transition-colors hover:text-white">{{ t('footer.contact') }}</a>
         </div>
       </div>
 
       <p class="mt-7 text-xs text-primary-light/60">
-        (c) 2026 SkinSense AI. All rights reserved.
+        {{ t('footer.copyright') }}
       </p>
     </div>
   </footer>
@@ -30,4 +30,7 @@
 
 <script setup>
 import { Leaf } from 'lucide-vue-next';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 </script>

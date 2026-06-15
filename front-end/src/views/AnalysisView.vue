@@ -2,11 +2,11 @@
   <div class="page-container section-pad">
     <div class="mx-auto max-w-3xl">
       <div class="mb-6 space-y-3">
-        <span class="badge">Profil kulit</span>
+        <span class="badge">{{ t('analysis.badge') }}</span>
         <div class="space-y-2">
-          <h1 class="text-4xl font-bold tracking-tight text-p-d sm:text-5xl">Profil kulit kamu</h1>
+          <h1 class="text-4xl font-bold tracking-tight text-p-d sm:text-5xl">{{ t('analysis.title') }}</h1>
           <p class="text-sm leading-6 text-gray-600 sm:text-base">
-            Jawaban ini dipakai untuk mengambil cuaca dari lokasi kamu dan mencocokkannya dengan rekomendasi produk.
+            {{ t('analysis.description') }}
           </p>
         </div>
       </div>
@@ -15,8 +15,8 @@
         <div class="space-y-8">
           <div class="space-y-3">
             <div class="flex items-center justify-between gap-3">
-              <label class="eyebrow">Jenis kulit</label>
-              <span class="text-xs font-semibold text-gray-400">Wajib</span>
+              <label class="eyebrow">{{ t('analysis.skinType') }}</label>
+              <span class="text-xs font-semibold text-gray-400">{{ t('analysis.required') }}</span>
             </div>
             <div class="grid grid-cols-2 gap-3 sm:grid-cols-5">
               <button
@@ -31,7 +31,7 @@
           </div>
 
           <div class="space-y-3">
-            <label class="eyebrow">Masalah kulit</label>
+            <label class="eyebrow">{{ t('analysis.concerns') }}</label>
             <div class="flex flex-wrap gap-2.5">
               <button
                 v-for="concern in concerns"
@@ -50,8 +50,8 @@
 
           <div class="space-y-3">
             <div class="flex items-center justify-between gap-3">
-              <label class="eyebrow">Produk yang dibutuhkan</label>
-              <span class="text-xs font-semibold text-gray-400">Pilih satu</span>
+              <label class="eyebrow">{{ t('analysis.productCategory') }}</label>
+              <span class="text-xs font-semibold text-gray-400">{{ t('analysis.chooseOne') }}</span>
             </div>
             <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
               <button
@@ -69,10 +69,10 @@
             </div>
           </div>
 
-          <div v-if="form.productCategory === 'Sunscreen'" class="rounded-3xl border border-primary/10 bg-accent-pink/45 p-4 sm:p-5">
+          <div v-if="isSunscreenCategory(form.productCategory)" class="rounded-3xl border border-primary/10 bg-accent-pink/45 p-4 sm:p-5">
             <div class="mb-4 space-y-1">
-              <label class="eyebrow text-primary-dark">Aktivitas harian</label>
-              <p class="text-sm leading-6 text-gray-600">Khusus sunscreen, aktivitas membantu mencocokkan proteksi yang paling pas.</p>
+              <label class="eyebrow text-primary-dark">{{ t('analysis.activity') }}</label>
+              <p class="text-sm leading-6 text-gray-600">{{ t('analysis.activityDescription') }}</p>
             </div>
             <div class="grid grid-cols-2 gap-3">
               <button
@@ -87,7 +87,7 @@
           </div>
 
           <div class="space-y-3">
-            <label class="eyebrow">Kandungan yang dihindari</label>
+            <label class="eyebrow">{{ t('analysis.avoidedIngredients') }}</label>
             <div class="flex flex-wrap gap-2.5">
               <button
                 v-for="ing in avoidOptions"
@@ -105,7 +105,7 @@
             <input
               type="text"
               v-model="form.customAvoidIngredients"
-              placeholder="Contoh: Centella, Salicylic Acid"
+              :placeholder="t('analysis.customPlaceholder')"
               class="min-h-12 w-full rounded-2xl border border-primary/10 bg-white px-4 text-sm text-gray-700 shadow-sm outline-none transition focus:border-primary/30 focus:ring-4 focus:ring-primary/10"
             />
           </div>
@@ -114,10 +114,10 @@
         <div class="sticky bottom-3 z-10 mt-8 rounded-3xl border border-white/70 bg-white/90 p-3 shadow-[0_18px_40px_rgba(45,62,39,0.14)] backdrop-blur-xl sm:static sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">
           <label v-if="auth.isAuthenticated" class="mb-3 flex items-start gap-3 rounded-2xl bg-primary/5 px-4 py-3 text-sm font-semibold text-primary-dark">
             <input v-model="saveProfile" type="checkbox" class="mt-1 h-4 w-4 accent-primary" />
-            <span>Simpan pilihan ini sebagai profil kulit utama saya.</span>
+            <span>{{ t('analysis.saveProfile') }}</span>
           </label>
           <div v-else class="mb-3 rounded-2xl bg-accent-pink/55 px-4 py-3 text-sm font-semibold text-s-d">
-            Login untuk menyimpan profil kulit dan melihat riwayat rekomendasi.
+            {{ t('analysis.guestPrompt') }}
           </div>
 
           <button
@@ -127,7 +127,7 @@
           >
             <LoaderCircle v-if="store.isLoading" class="h-5 w-5 animate-spin" />
             <Leaf v-else class="h-5 w-5" />
-            <span>{{ store.isLoading ? 'Menganalisis lokasi dan profil...' : 'Lihat rekomendasi saya' }}</span>
+            <span>{{ store.isLoading ? t('analysis.loading') : t('analysis.submit') }}</span>
           </button>
 
           <div v-if="store.error" class="mt-3 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
@@ -140,29 +140,35 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { Check, Leaf, LoaderCircle } from 'lucide-vue-next';
 import { useAnalysisStore } from '../stores/useAnalysisStore';
 import { useAuthStore } from '../stores/useAuthStore';
+import { useLocaleStore } from '../stores/useLocaleStore';
+import { getAnalysisOptions, isSunscreenCategory, mapBackendProfileToForm, normalizeAnalysisForm } from '../utils/analysisMapping';
 import { notifyError, notifySuccess } from '../utils/notifications';
 
 const router = useRouter();
 const store = useAnalysisStore();
 const auth = useAuthStore();
+const locale = useLocaleStore();
+const { t } = useI18n();
 const saveProfile = ref(true);
 
-const skinTypes = ['Normal', 'Kering', 'Berminyak', 'Kombinasi', 'Sensitif'];
-const concerns = ['Jerawat', 'Kusam', 'Penuaan', 'Bekas jerawat', 'Dehidrasi'];
-const productCategories = ['Cleanser', 'Moisturizer', 'Masker', 'Eye cream', 'Sunscreen'];
-const avoidOptions = ['Alkohol', 'Fragrance', 'Paraben', 'Silikon', 'Sulfat'];
-const activities = ['Indoor', 'Outdoor'];
+const options = computed(() => getAnalysisOptions(locale.locale));
+const skinTypes = computed(() => options.value.skinTypes);
+const concerns = computed(() => options.value.concerns);
+const productCategories = computed(() => options.value.productCategories);
+const avoidOptions = computed(() => options.value.avoidOptions);
+const activities = computed(() => options.value.activities);
 
 const form = reactive({
   skinType: '',
   concerns: [],
   productCategory: '',
-  activity: 'Indoor',
+  activity: locale.locale === 'id' ? 'Dalam ruangan' : 'Indoor',
   avoidIngredients: [],
   customAvoidIngredients: '',
 });
@@ -178,6 +184,25 @@ function applyFormValues(values) {
   form.customAvoidIngredients = values.customAvoidIngredients || '';
 }
 
+watch(
+  () => locale.locale,
+  (newLocale) => {
+    try {
+      const normalized = normalizeAnalysisForm(form);
+      const translatedForm = mapBackendProfileToForm({
+        skin_type: normalized.questionnaire.skin_type,
+        skin_concerns: normalized.questionnaire.skin_concerns,
+        avoided_ingredients: normalized.questionnaire.avoided_ingredients,
+        default_product_category: normalized.questionnaire.product_category,
+        default_activity_type: normalized.questionnaire.activity_type || 'indoor',
+      }, newLocale);
+      applyFormValues(translatedForm);
+    } catch (error) {
+      form.activity = newLocale === 'id' ? 'Dalam ruangan' : 'Indoor';
+    }
+  },
+);
+
 onMounted(async () => {
   if (!auth.isAuthenticated) return;
 
@@ -185,7 +210,7 @@ onMounted(async () => {
     const savedForm = await store.loadSavedSkinProfile();
     applyFormValues(savedForm);
   } catch (error) {
-    notifyError('Profil tersimpan gagal dimuat', error.message);
+    notifyError(t('analysis.errorLoadProfileTitle'), error.message);
   }
 });
 
@@ -215,10 +240,10 @@ const handleSubmit = async () => {
     if (auth.isAuthenticated && saveProfile.value) {
       await store.saveSkinProfile(form);
     }
-    notifySuccess('Rekomendasi siap', 'Hasil sudah disesuaikan dengan profil dan cuaca saat ini.');
-    router.push('/dashboard');
+    notifySuccess(t('analysis.successTitle'), t('analysis.successDescription'));
+    router.push(locale.path('/dashboard'));
   } catch (error) {
-    notifyError('Gagal mengambil rekomendasi', store.error || error.message);
+    notifyError(t('analysis.failedTitle'), store.error || error.message);
   }
 };
 </script>

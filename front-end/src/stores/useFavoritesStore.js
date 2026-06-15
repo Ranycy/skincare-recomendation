@@ -83,6 +83,12 @@ export const useFavoritesStore = defineStore("favorites", () => {
     return favorite;
   }
 
+  function clearFavorites() {
+    favorites.value = [];
+    error.value = "";
+    isLoading.value = false;
+  }
+
   return {
     favorites,
     isLoading,
@@ -92,5 +98,6 @@ export const useFavoritesStore = defineStore("favorites", () => {
     loadFavorites,
     saveProduct,
     removeProduct,
+    clearFavorites,
   };
 });

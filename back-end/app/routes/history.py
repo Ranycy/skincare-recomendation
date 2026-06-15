@@ -9,13 +9,15 @@ history_bp = Blueprint("history", __name__)
 def history():
     page = request.args.get("page", 1, type=int)
     limit = request.args.get("limit", 10, type=int)
-    result, status = get_history(request.headers.get("Authorization", ""), page, limit)
+    locale = request.args.get("locale")
+    result, status = get_history(request.headers.get("Authorization", ""), page, limit, locale)
     return jsonify(result), status
 
 
 @history_bp.route("/history/<questionnaire_id>", methods=["GET"])
 def history_detail(questionnaire_id):
-    result, status = get_history_detail(request.headers.get("Authorization", ""), questionnaire_id)
+    locale = request.args.get("locale")
+    result, status = get_history_detail(request.headers.get("Authorization", ""), questionnaire_id, locale)
     return jsonify(result), status
 
 
