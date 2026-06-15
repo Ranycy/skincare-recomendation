@@ -1,8 +1,9 @@
-from app import db
 from app.controllers.auth_controller import get_user_from_token
-from app.models.user import User
 from app.models.questionnaire import QuestionnaireProfile
 from app.models.recommendation import Recommendation
+from app.repositories.auth_repository import AuthRepository
+from app.repositories.questionnaire_repository import QuestionnaireRepository
+from app.repositories.recommendation_repository import RecommendationRepository
 from app.services.guidance_service import (
     build_explanation_factors,
     build_dynamic_why_recommended,
@@ -74,7 +75,7 @@ def create_recommendation(data: dict, auth_header: str = "") -> tuple[dict, int]
         if not user_id or not session_token:
             return {"error": "Guest session is required"}, 401
 
-        user = User.query.filter_by(id=user_id, session_token=session_token, is_guest=True).first()
+        user = AuthRepository.find_guest(user_id, session_token)
         if not user or is_expired(user.session_expires_at):
             return {"error": "Invalid or expired guest session"}, 401
         is_guest = True
@@ -112,8 +113,7 @@ def create_recommendation(data: dict, auth_header: str = "") -> tuple[dict, int]
         location_method=location_method,
         location_name=weather_data.get("location_name"),
     )
-    db.session.add(profile)
-    db.session.flush()
+    QuestionnaireRepository.create(profile)
 
     for rank, product in enumerate(results, start=1):
         dynamic_why = build_dynamic_why_recommended(product, questionnaire, weather_data, locale)
@@ -133,9 +133,9 @@ def create_recommendation(data: dict, auth_header: str = "") -> tuple[dict, int]
             rank=rank,
             is_guest=is_guest,
         )
-        db.session.add(rec)
+        RecommendationRepository.create(rec)
 
-    db.session.commit()
+    RecommendationRepository.commit()
 
     return {
         "locale": locale,

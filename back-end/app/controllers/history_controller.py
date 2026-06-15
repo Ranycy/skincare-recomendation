@@ -1,8 +1,9 @@
-from app import db
 from app.controllers.auth_controller import get_user_from_token
-from app.models.favorite_product import FavoriteProduct
 from app.models.questionnaire import QuestionnaireProfile
 from app.models.recommendation import Recommendation
+from app.repositories.questionnaire_repository import QuestionnaireRepository
+from app.repositories.recommendation_repository import RecommendationRepository
+from app.repositories.favorite_repository import FavoriteRepository
 from app.services.guidance_service import (
     build_explanation_factors,
     build_dynamic_why_recommended,
@@ -41,12 +42,7 @@ def profile_to_history_item(
     locale: str = "en",
 ) -> dict:
     locale = normalize_locale(locale)
-    recs = (
-        Recommendation.query
-        .filter_by(questionnaire_id=profile.id)
-        .order_by(Recommendation.rank)
-        .all()
-    )
+    recs = RecommendationRepository.find_by_questionnaire(profile.id)
     weather = {
         "location_name": profile.location_name or "Lokasi saat ini",
         "temperature": recs[0].temp_c if recs else None,
@@ -103,15 +99,7 @@ def get_history(auth_header: str, page: int = 1, limit: int = 10, locale: str | 
     resolved_locale = normalize_locale(locale, getattr(user, "preferred_locale", None))
     page = max(page, 1)
     limit = min(max(limit, 1), 50)
-    query = QuestionnaireProfile.query.filter_by(user_id=user.id)
-    total = query.count()
-    profiles = (
-        query
-        .order_by(QuestionnaireProfile.created_at.desc())
-        .offset((page - 1) * limit)
-        .limit(limit)
-        .all()
-    )
+    profiles, total = QuestionnaireRepository.find_by_user_paginated(user.id, page, limit)
 
     history = [
         profile_to_history_item(profile, include_recommendations=False, locale=resolved_locale)
@@ -135,7 +123,7 @@ def get_history_detail(auth_header: str, questionnaire_id: str, locale: str | No
     if error:
         return {"error": error}, 401
 
-    profile = QuestionnaireProfile.query.filter_by(id=questionnaire_id, user_id=user.id).first()
+    profile = QuestionnaireRepository.find_by_id_and_user(questionnaire_id, user.id)
     if not profile:
         return {"error": "History item not found"}, 404
 
@@ -152,16 +140,12 @@ def delete_history_item(auth_header: str, questionnaire_id: str) -> tuple[dict, 
     if error:
         return {"error": error}, 401
 
-    profile = QuestionnaireProfile.query.filter_by(id=questionnaire_id, user_id=user.id).first()
+    profile = QuestionnaireRepository.find_by_id_and_user(questionnaire_id, user.id)
     if not profile:
         return {"error": "History item not found"}, 404
 
-    FavoriteProduct.query.filter_by(
-        user_id=user.id,
-        source_questionnaire_id=questionnaire_id,
-    ).update({"source_questionnaire_id": None})
-    Recommendation.query.filter_by(questionnaire_id=questionnaire_id).delete()
-    db.session.delete(profile)
-    db.session.commit()
+    FavoriteRepository.clear_questionnaire_link(user.id, questionnaire_id)
+    RecommendationRepository.delete_by_questionnaire(questionnaire_id)
+    QuestionnaireRepository.delete(profile)
 
     return {"message": "History item deleted"}, 200
