@@ -4,7 +4,8 @@ __pycache__
 .env
 .git
 .claude
-front-end
+front-end/node_modules
+front-end/.env
 instance
 venv
 *.egg-info
