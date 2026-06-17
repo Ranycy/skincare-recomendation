@@ -130,7 +130,7 @@ export default {
     name: "Name",
     namePlaceholder: "Your name",
     email: "Email",
-    emailPlaceholder: "name@email.com",
+    emailPlaceholder: "name{'@'}email.com",
     password: "Password",
     passwordPlaceholder: "Your password",
     passwordSignupPlaceholder: "Minimum 6 characters",

@@ -130,7 +130,7 @@ export default {
     name: "Nama",
     namePlaceholder: "Nama kamu",
     email: "Email",
-    emailPlaceholder: "nama@email.com",
+    emailPlaceholder: "nama{'@'}email.com",
     password: "Kata sandi",
     passwordPlaceholder: "Kata sandi kamu",
     passwordSignupPlaceholder: "Minimal 6 karakter",
