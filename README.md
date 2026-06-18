@@ -296,4 +296,4 @@ SkinSense-AI/
 
 ## 📄 License
 
-This project was developed for educational and research purposes as part of the Dicoding x Bangkit Capstone Project.
+This project was developed for educational and research purposes as part of the Dicoding x Pijak Capstone Project.
